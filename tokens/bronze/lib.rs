@@ -16,9 +16,8 @@ mod bronze_token {
     impl BronzeToken {
         #[ink(constructor)]
         pub fn mint(initial_supply: Balance) -> Self {
-            let bronze_token = Erc20::new(initial_supply);
             Self {
-                token: bronze_token,
+                token: Erc20::new(initial_supply),
             }
         }
 
