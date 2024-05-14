@@ -1,9 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-
 #[ink::contract]
-mod crowdfunding_platform {
-    use faucet::Faucet;
+mod platform {
 
     #[ink(storage)]
     pub struct Platform { }
@@ -14,8 +12,10 @@ mod crowdfunding_platform {
             Self {}
         }
 
+        /// Initializes new campaign with `owner`, funding `goal` and `timeline`
         #[ink(message)]
-        pub fn transfer(&mut self) {
+        pub fn initialize_campaign(&self) {
+
         }
     }
 
