@@ -28,7 +28,7 @@ mod faucet {
         NextAccessTimeCalculation,
     }
 
-    /// 1 hour
+    /// 1 hour of wait time
     const WAIT_TIME: Timestamp = 3600;
 
     /// The Faucet result type.
@@ -75,9 +75,9 @@ mod faucet {
             }
 
             if self.is_allowed_to_withdraw_impl(&self.env().caller(), &token_contract) {
-                if let Some(withdrawing_amount) = self.tokens_withdraw_amount.get(&token_contract) {
+                if let Some(withdrawing_amount) = self.tokens_withdraw_amount.get(token_contract) {
                     let mut call_flags = ink::env::CallFlags::empty();
-                    call_flags.set(CallFlags::TAIL_CALL, true);
+                    call_flags.set(CallFlags::ALLOW_REENTRY, true); // continue with the function
 
                     let transfer_result = build_call::<DefaultEnvironment>()
                         .call(token_contract)
@@ -88,25 +88,19 @@ mod faucet {
                         .exec_input(
                             ExecutionInput::new(Selector::new(ink::selector_bytes!("transfer")))
                             .push_arg(self.env().caller()) // To
-                            .push_arg(withdrawing_amount) // Amount
+                            .push_arg(withdrawing_amount)  // Amount
                         )
                         .returns::<Result<()>>()
                         .try_invoke();
-
-                    // TODO: Somehow we do not contiue with our function -> do not print KUR, do
-                    //       not insert in the next_access_times
-                    ink::env::debug_println!("KUR");
 
                     if transfer_result.is_err() {
                         return Err(Error::TransferFailed);
                     }
 
-                    // TODO: Research/discuss whether it is better to use assert!(...) instead of
-                    //       returning Error gracefully (in Solidity, you would use require(...))
+                    // Better than assertions/panicks in order to provide additional error info
+                    // State is still reverted.
                     if let Some(caller_next_access_time) = self.env().block_timestamp().checked_add(WAIT_TIME) {
-                        ink::env::debug_println!("Next access time: {}; Current time: {}", caller_next_access_time, self.env().block_timestamp());
                         self.next_access_times.insert((&self.env().caller(), &token_contract), &caller_next_access_time);
-                        ink::env::debug_println!("Does it contain: {}", !self.next_access_times.contains((&self.env().caller(), &token_contract)));
                         Ok(())
                     }
                     else {
@@ -135,7 +129,6 @@ mod faucet {
                 return true;
             }
             else if let Some(next_access_time) = self.next_access_times.get((user, token_contract)) {
-                ink::env::debug_println!("Next access time: {}; Current time: {}", next_access_time, self.env().block_timestamp());
                 return next_access_time <= self.env().block_timestamp();
             }
             false
