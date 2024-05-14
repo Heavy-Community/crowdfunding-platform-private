@@ -17,6 +17,28 @@ mod platform {
         pub fn initialize_campaign(&self) {
 
         }
+
+        /// Invest `amount` of funds in particular `campaign`
+        #[ink(message)]
+        pub fn invest_funds(&self) {
+
+        }
+
+        /// `owner` of `campaign` can withdraw the deposited funds
+        #[ink(message)]
+        pub fn withdraw_funds(&self) {
+
+        }
+
+        /// investor in a `campaign` can revoke `amount` of his deposits
+        pub fn revoke_funds(&self) {
+
+        }
+
+        /// investor can refund his deposits of particular campaign
+        pub fn refund_funds(&self) {
+
+        }
     }
 
 }
