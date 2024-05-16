@@ -14,7 +14,7 @@ mod bronze_token {
         deploy_address: AccountId,
     }
 
-    /// The ERC-20 result type.
+    /// The Bronze result type.
     pub type Result<T> = core::result::Result<T, Error>;
 
     #[derive(Debug, PartialEq, Eq)]
@@ -28,7 +28,7 @@ mod bronze_token {
 
     impl BronzeToken {
         #[ink(constructor)]
-        pub fn mint(initial_supply: Balance, faucet_address: AccountId, deploy_address: AccountId) -> Self {
+        pub fn new(initial_supply: Balance, faucet_address: AccountId, deploy_address: AccountId) -> Self {
             Self {
                 token: Erc20::new(initial_supply),
                 faucet_address,
@@ -48,12 +48,12 @@ mod bronze_token {
 
         #[ink(message)]
         pub fn transfer(&mut self, to: AccountId, amount: Balance) -> Result<()> {
+            // TODO: think of better way to fill `Faucet` with tokens
             if self.env().caller() != self.faucet_address &&
                 self.env().caller() != self.deploy_address {
                     return Err(Error::InvalidAuthorization);
             }
-            let transaction = self.token.transfer(to, amount);
-            if transaction.is_ok() {
+            if self.token.transfer(to, amount).is_ok() {
                 Ok(())
             } else {
                 Err(Error::TransactionFailed)
