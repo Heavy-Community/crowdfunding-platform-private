@@ -1,18 +1,18 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
 #[ink::contract]
-mod bronze_token {
+mod silver_token {
 
     use erc20::Erc20;
 
     #[ink(storage)]
-    pub struct BronzeToken {
+    pub struct SilverToken {
         token: Erc20,
         faucet_address: AccountId,
         deploy_address: AccountId,
     }
 
-    /// The Bronze result type.
+    /// The Silver result type.
     pub type Result<T> = core::result::Result<T, Error>;
 
     #[derive(Debug, PartialEq, Eq)]
@@ -24,7 +24,7 @@ mod bronze_token {
         InvalidAuthorization,
     }
 
-    impl BronzeToken {
+    impl SilverToken {
         #[ink(constructor)]
         pub fn new(
             initial_supply: Balance,

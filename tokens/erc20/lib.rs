@@ -1,9 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-pub use self::erc20::{
-    Erc20,
-    Erc20Ref,
-};
+pub use self::erc20::{Erc20, Erc20Ref};
 
 #[ink::contract]
 mod erc20 {
@@ -180,7 +177,7 @@ mod erc20 {
             let caller = self.env().caller();
             let allowance = self.allowance_impl(&from, &caller);
             if allowance < value {
-                return Err(Error::InsufficientAllowance)
+                return Err(Error::InsufficientAllowance);
             }
             self.transfer_from_to(&from, &to, value)?;
             // We checked that allowance >= value
@@ -206,7 +203,7 @@ mod erc20 {
         ) -> Result<()> {
             let from_balance = self.balance_of_impl(from);
             if from_balance < value {
-                return Err(Error::InsufficientBalance)
+                return Err(Error::InsufficientBalance);
             }
             // We checked that from_balance >= value
             #[allow(clippy::arithmetic_side_effects)]

@@ -1,15 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-pub use self::faucet::{
-    Faucet,
-    FaucetRef,
-};
+pub use self::faucet::{Faucet, FaucetRef};
 
 #[ink::contract]
 mod faucet {
-    use ink::storage::Mapping;
-    use ink::env::{DefaultEnvironment, CallFlags};
     use ink::env::call::{build_call, ExecutionInput, Selector};
+    use ink::env::{CallFlags, DefaultEnvironment};
+    use ink::storage::Mapping;
 
     /// The Faucet error types.
     #[derive(Debug, PartialEq, Eq)]
@@ -59,11 +56,16 @@ mod faucet {
 
         /// Insert new token type that the faucet can "give"
         #[ink(message)]
-        pub fn add_token_type(&mut self, token_contract: AccountId, withdrawing_amount: Balance) -> Result<()> {
+        pub fn add_token_type(
+            &mut self,
+            token_contract: AccountId,
+            withdrawing_amount: Balance,
+        ) -> Result<()> {
             if self.tokens_withdraw_amount.contains(token_contract) {
                 return Err(Error::TokenAlreadyAdded);
             }
-            self.tokens_withdraw_amount.insert(token_contract, &withdrawing_amount);
+            self.tokens_withdraw_amount
+                .insert(token_contract, &withdrawing_amount);
             Ok(())
         }
 
@@ -87,8 +89,8 @@ mod faucet {
                         .call_flags(call_flags)
                         .exec_input(
                             ExecutionInput::new(Selector::new(ink::selector_bytes!("transfer")))
-                            .push_arg(self.env().caller()) // To
-                            .push_arg(withdrawing_amount)  // Amount
+                                .push_arg(self.env().caller()) // To
+                                .push_arg(withdrawing_amount), // Amount
                         )
                         .returns::<Result<()>>()
                         .try_invoke();
@@ -99,19 +101,21 @@ mod faucet {
 
                     // Better than assertions/panicks in order to provide additional error info
                     // State is still reverted.
-                    if let Some(caller_next_access_time) = self.env().block_timestamp().checked_add(WAIT_TIME) {
-                        self.next_access_times.insert((&self.env().caller(), &token_contract), &caller_next_access_time);
+                    if let Some(caller_next_access_time) =
+                        self.env().block_timestamp().checked_add(WAIT_TIME)
+                    {
+                        self.next_access_times.insert(
+                            (&self.env().caller(), &token_contract),
+                            &caller_next_access_time,
+                        );
                         Ok(())
-                    }
-                    else {
+                    } else {
                         Err(Error::NextAccessTimeCalculation)
                     }
-                }
-                else {
+                } else {
                     Err(Error::TokenNotFound)
                 }
-            }
-            else {
+            } else {
                 Err(Error::UserNotAllowedToWithdraw)
             }
         }
@@ -124,15 +128,19 @@ mod faucet {
         }
 
         #[inline]
-        fn is_allowed_to_withdraw_impl(&self, user: &AccountId, token_contract: &AccountId) -> bool {
+        fn is_allowed_to_withdraw_impl(
+            &self,
+            user: &AccountId,
+            token_contract: &AccountId,
+        ) -> bool {
             if !self.next_access_times.contains((user, token_contract)) {
                 return true;
-            }
-            else if let Some(next_access_time) = self.next_access_times.get((user, token_contract)) {
+            } else if let Some(next_access_time) =
+                self.next_access_times.get((user, token_contract))
+            {
                 return next_access_time <= self.env().block_timestamp();
             }
             false
         }
     }
-
 }
