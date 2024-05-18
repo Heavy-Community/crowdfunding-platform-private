@@ -3,7 +3,7 @@
 
 #[ink::contract]
 mod platform {
-    use ink::{primitives::AccountId, storage::{Mapping, StorageVec}};
+    use ink::storage::Mapping;
 
     /// The Faucet error types.
     #[derive(Debug, PartialEq, Eq)]
@@ -17,11 +17,31 @@ mod platform {
     /// The Platform result type.
     pub type Result<T> = core::result::Result<T, Error>;
 
+
+    // TODO: Emo: Check whether you can seprate the Project structure
+    //       in separate file..
+
+    /// The Project error types.
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum ProjectError {
+        GeneralError,
+        FailedCalculation,
+        AlreadySuccesfull,
+        Dead
+    }
+
+    /// The Project result type.
+    pub type ProjectResult<T> = core::result::Result<T, ProjectError>;
+
     /// Representation of a project in our Platform
     #[ink::storage_item]
     pub struct Project {
         /// Map of all users and the tokens invested in the project
         investors: Mapping<UserTokenPair, Balance>,
+
+        /// All invested funds in the project in respect to the
+        /// smallest token type (Bronze)
+        invested_funds: Balance,
 
         /// Overal invested funds that in the project
         /// Funding goal measured in smallest token type (Bronze)
@@ -43,16 +63,47 @@ mod platform {
     }
 
     impl Project {
-        // here we pbly have some help implementation for the
-        // project type: Most importantly the calculation of the
-        pub fn is_investor(&self, user: &AccountId) -> bool {
-            self.invested_funds.contains((user, _))
+        pub fn is_investor_of_a_token(&self, user: &AccountId, token: &AccountId) -> bool {
+            self.investors.contains((user, token))
         }
 
-        pub fn is_invested_token(&self, user: &AccountId, token: &AccountId) -> bool {
+        pub fn is_successful(&self) -> bool {
+            self.successful
         }
 
-        pub fn invest(&mut self, user: &AccountId, token: &AccountId, amount: Balance) -> Result<()> {
+        pub fn invest(&mut self, user: &AccountId, token: &AccountId, conversion_rate: u32, amount: Balance) -> ProjectResult<()> {
+            if self.is_successful() {
+                return Err(ProjectError::AlreadySuccesfull);
+            }
+
+            // First add the amount to overall project invested_funds
+            let amount_to_add = amount.checked_mul(conversion_rate as Balance);
+            if amount_to_add.is_none() {
+                return Err(ProjectError::FailedCalculation);
+            }
+            let amount_to_add = amount_to_add.unwrap();
+
+            let invested_funds = self.invested_funds.checked_add(amount_to_add);
+            if invested_funds.is_none() {
+                return Err(ProjectError::FailedCalculation);
+            }
+            self.invested_funds = invested_funds.unwrap();
+            
+
+            // Then add the amount to the corresponding user's invested_funds
+            if let Some(user_invested_funds) = self.investors.get((user, token)) {
+                let amount = user_invested_funds.checked_add(amount);
+                if amount.is_none() {
+                    return Err(ProjectError::FailedCalculation); // shouldn't happen
+                }
+
+                self.investors.insert((user, token), &amount.unwrap());
+            }
+            else {
+                self.investors.insert((user, token),  &amount);
+            }
+
+
             Ok(())
         }
     }
@@ -63,6 +114,7 @@ mod platform {
     impl Platform {
         #[ink(constructor)]
         pub fn new() -> Self {
+            Self {}
         }
 
         /// Initializes new campaign with `owner`, funding `goal` and `timeline`
