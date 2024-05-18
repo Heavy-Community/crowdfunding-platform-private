@@ -1,7 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-pub use self::bronze_token::BronzeToken;
-
 #[ink::contract]
 mod bronze_token {
 
@@ -23,12 +21,16 @@ mod bronze_token {
         /// Returned if the transaction from the `faucet` to the respective receiver fails
         TransactionFailed,
         /// Returned if the caller of the `transfer` function isn't the faucet
-        InvalidAuthorization
+        InvalidAuthorization,
     }
 
     impl BronzeToken {
         #[ink(constructor)]
-        pub fn new(initial_supply: Balance, faucet_address: AccountId, deploy_address: AccountId) -> Self {
+        pub fn new(
+            initial_supply: Balance,
+            faucet_address: AccountId,
+            deploy_address: AccountId,
+        ) -> Self {
             Self {
                 token: Erc20::new(initial_supply),
                 faucet_address,
@@ -49,9 +51,10 @@ mod bronze_token {
         #[ink(message)]
         pub fn transfer(&mut self, to: AccountId, amount: Balance) -> Result<()> {
             // TODO: think of better way to fill `Faucet` with tokens
-            if self.env().caller() != self.faucet_address &&
-                self.env().caller() != self.deploy_address {
-                    return Err(Error::InvalidAuthorization);
+            if self.env().caller() != self.faucet_address
+                && self.env().caller() != self.deploy_address
+            {
+                return Err(Error::InvalidAuthorization);
             }
             if self.token.transfer(to, amount).is_ok() {
                 Ok(())
