@@ -2,7 +2,7 @@
 
 #[ink::contract]
 mod platform {
-    use ink::storage::Mapping;
+    use ink::{scale::{Encode, WrapperTypeEncode}, storage::Mapping};
 
     /// The Faucet error types.
     #[derive(Debug, PartialEq, Eq)]
@@ -72,7 +72,12 @@ mod platform {
         }
 
         // Level is going to be provided from the FE
-        pub fn invest(&mut self, user: &AccountId, amount: Balance, level: u8) -> ProjectResult<()> {
+        pub fn invest(
+            &mut self,
+            user: &AccountId,
+            amount: Balance,
+            level: u8,
+        ) -> ProjectResult<()> {
             if self.is_successful() {
                 return Err(ProjectError::AlreadySuccesfull);
             }
@@ -93,8 +98,7 @@ mod platform {
                 }
 
                 self.investors.insert(user, &(new_amount.unwrap(), level));
-            }
-            else {
+            } else {
                 self.investors.insert(user, &(amount, level));
             }
 
@@ -109,7 +113,7 @@ mod platform {
             let investor = self.investors.get(user).unwrap();
             Ok(investor.1)
         }
-        
+
         // fn calculate_new_inv_level(&self, current_level: u8, amount_invested: &Balance) -> u8 {
         //     for () {
         //         if amoun
@@ -117,41 +121,63 @@ mod platform {
         // }
     }
 
+
     #[ink(storage)]
-    pub struct Platform { }
+    pub struct Platform {
+        projects_counter: u128,
+        // ongoing_projects: Mapping<u128, Project>,
+    }
 
     impl Platform {
         #[ink(constructor)]
         pub fn new() -> Self {
-            Self {}
+            unreachable!("Constructor isn't called since we are using Delegator pattern!");
         }
 
         /// Initializes new campaign with `owner`, funding `goal` and `timeline`
         #[ink(message)]
-        pub fn initialize_campaign(&self) {
-
-        }
+        pub fn initialize_campaign(&self) {}
 
         /// Invest `amount` of funds in particular `campaign`
         #[ink(message)]
-        pub fn invest_funds(&self) {
+        pub fn invest_funds(&self) {}
+
+        #[ink(message, selector = 0xAWITHDRAW)]
+        pub fn withdraw_funds(&self, owner: AccountId, project_id: u128) {
+            self.is_project_owner(owner);
+            self.is_project_successful(project_id);
+            self.is_existing_project(project_id);
         }
 
-        /// `owner` of `campaign` can withdraw the deposited funds
-        #[ink(message)]
-        pub fn withdraw_funds(&self) {
+        /// Investor in a `campaign` can revoke `amount` of his deposits.
+        pub fn revoke_funds(&self) {}
 
+        /// Investor can refund his deposits of particular campaign.
+        pub fn refund_funds(&self) {}
+
+        /// Checks if the caller is the owner of the project.
+        fn is_project_owner(&self, owner: AccountId) {
+            assert_eq!(
+                self.env().caller(),
+                owner,
+                "{:?} cannot withdraw!. Only the owner ({:?}) of the project can withdraw the funds!",
+                self.env().caller(),
+                owner
+            )
         }
 
-        /// investor in a `campaign` can revoke `amount` of his deposits
-        pub fn revoke_funds(&self) {
-
+        /// Checks if project is successful.
+        fn is_project_successful(&self, project_id: u128) {
+            // assert_eq!(ongoing_projects[project_id].successful, true, "Project must be successful!");
         }
 
-        /// investor can refund his deposits of particular campaign
-        pub fn refund_funds(&self) {
+        /// Checks if project exists.
+        fn is_existing_project(&self, project_id: u128) {
+            // assert_eq!(ongoing_projects[project_id].does_exist, true, "Project must exist!");
+        }
 
+        fn is_before_deadline(&self, project_id: u128) {
+            // assert_eq!(ongoing_projects[project_id].deadline > env::current_time(), false, "Project must exist!");
         }
     }
-
 }
