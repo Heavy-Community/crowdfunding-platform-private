@@ -1,6 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-
 #[ink::contract]
 mod platform {
     use ink::storage::Mapping;
@@ -16,7 +15,6 @@ mod platform {
 
     /// The Platform result type.
     pub type Result<T> = core::result::Result<T, Error>;
-
 
     // TODO: Emo: Check whether you can seprate the Project structure
     //       in separate file..
@@ -37,7 +35,7 @@ mod platform {
     #[ink::storage_item]
     pub struct Project {
         /// Map of all users and the tokens invested in the project
-        investors: Mapping<UserTokenPair, Balance>,
+        investors: Mapping<AccountId, Balance>,
 
         /// All invested funds in the project in respect to the
         /// smallest token type (Bronze)
@@ -48,8 +46,8 @@ mod platform {
         funding_goal: Balance,
 
         /// Map of tokens' goals that needs to be reached
-        /// in order for a user to reach different benefits
-        token_goals: Mapping<AccountId, Balance>,
+        /// and the corresponding benefits every level offers
+        // token_goals: Mapping<Balance, String>,
 
         /// The deadline for the project after it will be
         /// *destroyed* if `funding_goal` was not reached
@@ -63,46 +61,38 @@ mod platform {
     }
 
     impl Project {
-        pub fn is_investor_of_a_token(&self, user: &AccountId, token: &AccountId) -> bool {
-            self.investors.contains((user, token))
+        pub fn is_investor_of_a_token(&self, user: &AccountId) -> bool {
+            self.investors.contains(user)
         }
 
         pub fn is_successful(&self) -> bool {
             self.successful
         }
 
-        pub fn invest(&mut self, user: &AccountId, token: &AccountId, conversion_rate: u32, amount: Balance) -> ProjectResult<()> {
+        pub fn invest(&mut self, user: &AccountId, amount: Balance) -> ProjectResult<()> {
             if self.is_successful() {
                 return Err(ProjectError::AlreadySuccesfull);
             }
 
             // First add the amount to overall project invested_funds
-            let amount_to_add = amount.checked_mul(conversion_rate as Balance);
-            if amount_to_add.is_none() {
-                return Err(ProjectError::FailedCalculation);
-            }
-            let amount_to_add = amount_to_add.unwrap();
-
-            let invested_funds = self.invested_funds.checked_add(amount_to_add);
+            let invested_funds = self.invested_funds.checked_add(amount);
             if invested_funds.is_none() {
                 return Err(ProjectError::FailedCalculation);
             }
             self.invested_funds = invested_funds.unwrap();
-            
 
             // Then add the amount to the corresponding user's invested_funds
-            if let Some(user_invested_funds) = self.investors.get((user, token)) {
+            if let Some(user_invested_funds) = self.investors.get(user) {
                 let amount = user_invested_funds.checked_add(amount);
                 if amount.is_none() {
                     return Err(ProjectError::FailedCalculation); // shouldn't happen
                 }
 
-                self.investors.insert((user, token), &amount.unwrap());
+                self.investors.insert(user, &amount.unwrap());
             }
             else {
-                self.investors.insert((user, token),  &amount);
+                self.investors.insert(user, &amount);
             }
-
 
             Ok(())
         }
