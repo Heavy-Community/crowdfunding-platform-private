@@ -25,29 +25,31 @@ mod platform {
         GeneralError,
         FailedCalculation,
         AlreadySuccesfull,
-        Dead
+        DeadProject,
+        NotInvestor,
     }
 
     /// The Project result type.
     pub type ProjectResult<T> = core::result::Result<T, ProjectError>;
 
+    /// Investor info related to to the project (balance invested and current level)
+    pub type InvestorInfo = (Balance, u8);
+
     /// Representation of a project in our Platform
     #[ink::storage_item]
     pub struct Project {
-        /// Map of all users and the tokens invested in the project
-        investors: Mapping<AccountId, Balance>,
+        /// Map of all users and the amount they have invested in the project
+        investors: Mapping<AccountId, InvestorInfo>,
 
-        /// All invested funds in the project in respect to the
-        /// smallest token type (Bronze)
+        /// All invested funds in the project
         invested_funds: Balance,
 
-        /// Overal invested funds that in the project
         /// Funding goal measured in smallest token type (Bronze)
         funding_goal: Balance,
 
-        /// Map of tokens' goals that needs to be reached
-        /// and the corresponding benefits every level offers
-        // token_goals: Mapping<Balance, String>,
+        /// Map of all levels that investor can reach
+        /// based on the balance that is invested
+        invest_levels: Mapping<u8, Balance>,
 
         /// The deadline for the project after it will be
         /// *destroyed* if `funding_goal` was not reached
@@ -69,7 +71,8 @@ mod platform {
             self.successful
         }
 
-        pub fn invest(&mut self, user: &AccountId, amount: Balance) -> ProjectResult<()> {
+        // Level is going to be provided from the FE
+        pub fn invest(&mut self, user: &AccountId, amount: Balance, level: u8) -> ProjectResult<()> {
             if self.is_successful() {
                 return Err(ProjectError::AlreadySuccesfull);
             }
@@ -82,20 +85,36 @@ mod platform {
             self.invested_funds = invested_funds.unwrap();
 
             // Then add the amount to the corresponding user's invested_funds
-            if let Some(user_invested_funds) = self.investors.get(user) {
-                let amount = user_invested_funds.checked_add(amount);
-                if amount.is_none() {
+            if let Some(investor_info) = self.investors.get(user) {
+                let new_amount = investor_info.0.checked_add(amount);
+                let current_level = investor_info.1;
+                if new_amount.is_none() {
                     return Err(ProjectError::FailedCalculation); // shouldn't happen
                 }
 
-                self.investors.insert(user, &amount.unwrap());
+                self.investors.insert(user, &(new_amount.unwrap(), level));
             }
             else {
-                self.investors.insert(user, &amount);
+                self.investors.insert(user, &(amount, level));
             }
 
             Ok(())
         }
+
+        pub fn get_investor_level(&self, user: &AccountId) -> ProjectResult<u8> {
+            if !self.investors.contains(user) {
+                return Err(ProjectError::NotInvestor);
+            }
+
+            let investor = self.investors.get(user).unwrap();
+            Ok(investor.1)
+        }
+        
+        // fn calculate_new_inv_level(&self, current_level: u8, amount_invested: &Balance) -> u8 {
+        //     for () {
+        //         if amoun
+        //     }
+        // }
     }
 
     #[ink(storage)]
