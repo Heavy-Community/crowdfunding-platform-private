@@ -38,7 +38,7 @@ mod platform {
         /// 3. Sets the `delegate_to` to the new hash.
         #[ink(message)]
         pub fn upgrade_delegate_to(&mut self, new_code_hash: Hash) {
-            let _ = self.is_proxy_owner();
+            self.is_proxy_owner();
             if let Some(old_code_hash) = self.delegate_to.get() {
                 self.env().unlock_delegate_dependency(&old_code_hash)
             }
