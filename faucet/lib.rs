@@ -78,8 +78,22 @@ mod faucet {
 
             if self.is_allowed_to_withdraw_impl(&self.env().caller(), &token_contract) {
                 if let Some(withdrawing_amount) = self.tokens_withdraw_amount.get(token_contract) {
+
+                    // Add user's wait_time for next possible request of tokens
+                    if let Some(caller_next_access_time) =
+                        self.env().block_timestamp().checked_add(WAIT_TIME)
+                    {
+                        self.next_access_times.insert(
+                            (&self.env().caller(), &token_contract),
+                            &caller_next_access_time,
+                        );
+                    } else {
+                        return Err(Error::NextAccessTimeCalculation);
+                    }
+
+                    // Transfer money to the user
                     let mut call_flags = ink::env::CallFlags::empty();
-                    call_flags.set(CallFlags::ALLOW_REENTRY, true); // continue with the function
+                    call_flags.set(CallFlags::TAIL_CALL, true);
 
                     let transfer_result = build_call::<DefaultEnvironment>()
                         .call(token_contract)
@@ -95,22 +109,11 @@ mod faucet {
                         .returns::<Result<()>>()
                         .try_invoke();
 
-                    if transfer_result.is_err() {
-                        return Err(Error::TransferFailed);
-                    }
-
-                    // Better than assertions/panicks in order to provide additional error info
-                    // State is still reverted.
-                    if let Some(caller_next_access_time) =
-                        self.env().block_timestamp().checked_add(WAIT_TIME)
-                    {
-                        self.next_access_times.insert(
-                            (&self.env().caller(), &token_contract),
-                            &caller_next_access_time,
-                        );
+                    if transfer_result.is_ok() {
                         Ok(())
-                    } else {
-                        Err(Error::NextAccessTimeCalculation)
+                    }
+                    else {
+                        Err(Error::TransferFailed)
                     }
                 } else {
                     Err(Error::TokenNotFound)
