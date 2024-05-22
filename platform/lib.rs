@@ -112,9 +112,6 @@ mod platform {
     impl Platform {
         #[ink(constructor)]
         pub fn new(token_address: AccountId) -> Self {
-            // TODO: WTF MAN? Emo asks' Niko - why unreachable??
-            // unreachable!("Constructor isn't called since we are using Delegator pattern!");
-
             Self {
                 projects_counter: 0,
                 ongoing_projects: Mapping::new(),
