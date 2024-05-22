@@ -64,33 +64,40 @@ mod platform {
     }
 
     impl Project {
-        // TODO: Implement the constructor of the project
-        //       to only accept: owner, funding_goal, deadline
-        // pub fn new() -> Self {
-        // }
-
+        /// Flag marking status of project as failed.
         fn fail(&mut self) {
             self.status = ProjectStatus::Failed
         }
 
-        fn invest_funds(&mut self, amount: Balance) -> Result<()> {
-            let new_invest_funds = self.invested_funds.checked_add(amount);
-            if new_invest_funds.is_none() {
-                return Err(Error::FailedCalculation);
-            }
+        /// Flag marking status of project as successful.
+        fn success(&mut self) {
+            self.status = ProjectStatus::Succeded;
+        }
 
-            self.invested_funds = new_invest_funds.unwrap();
+        /// Updates the state of the invested funds and the project.
+        fn invest_funds(&mut self, amount: Balance) -> Result<()> {
+            // let new_invest_funds = self.invested_funds.checked_add(amount);
+            // if new_invest_funds.is_none() {
+            //     return Err(Error::FailedCalculation);
+            // }
+
+            // self.invested_funds = new_invest_funds.unwrap();
+            let _ = self.invested_funds.checked_add(amount);
+            if self.invested_funds >= self.funding_goal {
+                self.success();
+            }
 
             Ok(())
         }
 
+        /// Updates the state of the project based on its deadline and current time.
         fn update(&mut self, current_time: Timestamp) {
             if self.deadline < current_time {
-                self.status = ProjectStatus::Failed;
+                self.fail();
             } else if self.status == ProjectStatus::Ongoing
                 && self.invested_funds >= self.funding_goal
             {
-                self.status = ProjectStatus::Succeded;
+                self.success();
             }
         }
     }
@@ -113,7 +120,7 @@ mod platform {
         #[ink(constructor)]
         pub fn new(token_address: AccountId) -> Self {
             Self {
-                projects_counter: 0,
+                projects_counter: 1,
                 ongoing_projects: Mapping::new(),
                 investors: Mapping::new(),
                 token_address,
@@ -173,14 +180,11 @@ mod platform {
             }
 
             // Update the project instance
-            self.ongoing_projects
-                .get(project_id)
-                .unwrap()
-                .invest_funds(amount)?;
-            self.ongoing_projects
-                .get(project_id)
-                .unwrap()
-                .update(self.env().block_timestamp());
+            let mut project = self.ongoing_projects.get(project_id).unwrap();
+            project.invest_funds(amount)?;
+            project.update(self.env().block_timestamp());
+
+            self.ongoing_projects.insert(project_id, &project);
 
             // Transfer the invested `amount` to platform's address
             let mut call_flags = ink::env::CallFlags::empty();
@@ -253,6 +257,7 @@ mod platform {
         }
 
         /// Investor in a `project` can revoke `amount` of his deposits.
+        #[ink(message)]
         pub fn revoke_funds(&mut self, project_id: u128, amount: Balance) -> Result<()> {
             self.is_existing_project(project_id)?;
             self.is_project_ongoing(project_id)?;
