@@ -38,6 +38,7 @@ mod platform {
     }
 
     /// Representation of a project in our Platform
+    #[derive(Debug, PartialEq, Eq)]
     #[ink::scale_derive(Encode, Decode, TypeInfo)]
     #[cfg_attr(feature = "std", derive(ink::storage::traits::StorageLayout))]
     pub struct Project {
@@ -76,14 +77,13 @@ mod platform {
 
         /// Updates the state of the invested funds and the project.
         fn invest_funds(&mut self, amount: Balance) -> Result<()> {
-            // let new_invest_funds = self.invested_funds.checked_add(amount);
-            // if new_invest_funds.is_none() {
-            //     return Err(Error::FailedCalculation);
-            // }
+            let new_invest_funds = self.invested_funds.checked_add(amount);
+            if new_invest_funds.is_none() {
+                return Err(Error::FailedCalculation);
+            }
 
-            // self.invested_funds = new_invest_funds.unwrap();
-            let _ = self.invested_funds.checked_add(amount);
-            if self.invested_funds >= self.funding_goal {
+            self.invested_funds = new_invest_funds.unwrap();
+            if self.status != ProjectStatus::Succeded && self.invested_funds >= self.funding_goal {
                 self.success();
             }
 
@@ -91,13 +91,9 @@ mod platform {
         }
 
         /// Updates the state of the project based on its deadline and current time.
-        fn update(&mut self, current_time: Timestamp) {
-            if self.deadline < current_time {
+        fn is_over_the_deadline(&mut self, current_time: Timestamp) {
+            if self.deadline < current_time && self.status == ProjectStatus::Ongoing {
                 self.fail();
-            } else if self.status == ProjectStatus::Ongoing
-                && self.invested_funds >= self.funding_goal
-            {
-                self.success();
             }
         }
     }
@@ -162,7 +158,7 @@ mod platform {
         pub fn invest_funds(&mut self, amount: Balance, project_id: u128) -> Result<()> {
             self.is_existing_project(project_id)?;
             self.is_before_deadline(project_id)?;
-            self.is_project_ongoing(project_id)?;
+            self.is_project_ongoing_or_successfull(project_id)?;
 
             if amount == 0 {
                 return Err(Error::ZeroAmount);
@@ -182,8 +178,7 @@ mod platform {
             // Update the project instance
             let mut project = self.ongoing_projects.get(project_id).unwrap();
             project.invest_funds(amount)?;
-            project.update(self.env().block_timestamp());
-
+            project.is_over_the_deadline(self.env().block_timestamp());
             self.ongoing_projects.insert(project_id, &project);
 
             // Transfer the invested `amount` to platform's address
@@ -212,10 +207,10 @@ mod platform {
             Ok(())
         }
 
-        /// When a project became _successfull_ has raised funds on time
-        /// _the owner_ can collect his/her funds by `withdraw_funds`
+        /// When a project became `successful` has raised funds on time
+        /// the `owner` can collect his funds by `withdraw_funds`.
         #[ink(message)]
-        pub fn withdraw_funds(&self, project_id: u128) -> Result<()> {
+        pub fn withdraw_funds(&mut self, project_id: u128) -> Result<()> {
             self.is_existing_project(project_id)?;
             self.is_project_successfull(project_id)?;
 
@@ -263,6 +258,7 @@ mod platform {
             self.is_project_ongoing(project_id)?;
 
             let investor = self.env().caller();
+            self.is_investor_in_project(project_id, investor)?;
             let invested_amount = self.investors.get((investor, project_id)).unwrap();
 
             if invested_amount < amount {
@@ -385,6 +381,17 @@ mod platform {
         /// Checks whether `project_id` has been finished successfully.
         fn is_project_successfull(&self, project_id: u128) -> Result<()> {
             if self.ongoing_projects.get(project_id).unwrap().status == ProjectStatus::Succeded {
+                Ok(())
+            } else {
+                Err(Error::ProjectNotSuccesfull)
+            }
+        }
+
+        /// Checks whether `project_id` has been finished successfully or is still going.
+        fn is_project_ongoing_or_successfull(&self, project_id: u128) -> Result<()> {
+            if self.ongoing_projects.get(project_id).unwrap().status == ProjectStatus::Succeded
+                || self.ongoing_projects.get(project_id).unwrap().status == ProjectStatus::Ongoing
+            {
                 Ok(())
             } else {
                 Err(Error::ProjectNotSuccesfull)
