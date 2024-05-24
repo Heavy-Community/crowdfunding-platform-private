@@ -166,13 +166,18 @@ mod platform {
 
             let investor = self.env().caller();
 
-            if let Some(current_invested_amount) = self.investors.get((investor, project_id)) {
-                let new_invested_amount = current_invested_amount.checked_add(amount);
-                if new_invested_amount.is_none() {
-                    return Err(Error::FailedCalculation);
+            // If already the investor has deposited funds in particular project.
+            if self.investors.contains((investor, project_id)) {
+                if let Some(current_invested_amount) = self.investors.get((investor, project_id)) {
+                    let new_invested_amount = current_invested_amount.checked_add(amount);
+                    if new_invested_amount.is_none() {
+                        return Err(Error::FailedCalculation);
+                    }
+
+                    self.investors.insert((investor, project_id), &new_invested_amount.unwrap());
                 }
-                self.investors
-                    .insert((investor, project_id), &new_invested_amount.unwrap());
+            } else {
+                self.investors.insert((investor, project_id), &amount);
             }
 
             // Update the project instance
@@ -259,13 +264,27 @@ mod platform {
 
             let investor = self.env().caller();
             self.is_investor_in_project(project_id, investor)?;
-            let invested_amount = self.investors.get((investor, project_id)).unwrap();
 
-            if invested_amount < amount {
-                return Err(Error::InvalidAmount);
-            }
             if amount == 0 {
                 return Err(Error::ZeroAmount);
+            }
+
+            if let Some(current_invested_amount) = self.investors.get((investor, project_id)) {
+                let amount_after_revoke = current_invested_amount.checked_sub(amount);
+                if amount_after_revoke.is_none() {
+                    return Err(Error::InvalidAmount);
+                }
+                // Remove from investors if investor decides to revoke all his deposits.
+                if amount_after_revoke.unwrap() == 0 {
+                    self.investors.remove((investor, project_id));    
+                } else {
+                    // If he is revoking only a certain amount, overwrite his investment.
+                    self.investors.insert((investor, project_id), &amount_after_revoke.unwrap());
+                }
+
+                let mut project = self.ongoing_projects.get(project_id).unwrap();
+                project.invested_funds = project.invested_funds.checked_sub(amount).unwrap();
+                self.ongoing_projects.insert(project_id, &project);
             }
 
             // Transfer the `amount_invested` previously by `investor` back to him
@@ -293,8 +312,8 @@ mod platform {
             Ok(())
         }
 
-        /// When a _project_ has failed, all investor on that project
-        /// can _refund_ their funds by `refund_funds`
+        /// When a `project` has failed, all investors on that project
+        /// can `refund` their funds by `refund_funds`.
         #[ink(message)]
         pub fn refund_funds(&mut self, project_id: u128) -> Result<()> {
             self.is_existing_project(project_id)?;
@@ -305,6 +324,17 @@ mod platform {
 
             let amount_invested = self.investors.get((investor, project_id)).unwrap();
             self.investors.remove((investor, project_id));
+
+            let mut project = self.ongoing_projects.get(project_id).unwrap();
+            project.invested_funds = project.invested_funds.checked_sub(amount_invested).unwrap();
+
+            // Check if the project's invested funds are zero, and remove the project.
+            if project.invested_funds == 0 {
+                self.ongoing_projects.remove(project_id)
+            } else {
+                // Overwrite the project's value with the previously decreased value.
+                self.ongoing_projects.insert(project_id, &project);
+            }
 
             // Transfer the `amount_invested` previously by `investor` back to him
             let mut call_flags = ink::env::CallFlags::empty();
@@ -346,7 +376,7 @@ mod platform {
             }
         }
 
-        /// Checks if `project_id` is successful.
+        /// Checks if `project_id` is still going.
         fn is_project_ongoing(&self, project_id: u128) -> Result<()> {
             if self.ongoing_projects.get(project_id).unwrap().status == ProjectStatus::Ongoing {
                 Ok(())

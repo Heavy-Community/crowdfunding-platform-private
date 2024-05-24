@@ -176,7 +176,6 @@ mod erc20 {
         ) -> Result<()> {
             let caller = self.env().caller();
             let allowance = self.allowance_impl(&from, &caller);
-            ink::env::debug_println!("FROM: {:?}, TO: {:?}, AMOUNT: {}, CALLER: {:?}; ALLOWENCE: {}", from, to, value, caller, allowance);
             if allowance < value {
                 return Err(Error::InsufficientAllowance);
             }
