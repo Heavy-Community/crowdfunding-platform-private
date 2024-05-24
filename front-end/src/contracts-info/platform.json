@@ -1,10 +1,10 @@
 {
   "source": {
-    "hash": "0x29c4c1cce888ccaf420d9ff4492531f9697e63266f31a9bdbc1a3e7db46b6fa5",
+    "hash": "0x850a00c49e4ea80e21719023e00f4325d873de65c9c1680e599b09827dfd91f2",
     "language": "ink! 5.0.0",
     "compiler": "rustc 1.77.2",
     "build_info": {
-      "build_mode": "Release",
+      "build_mode": "Debug",
       "cargo_contract_version": "4.1.1",
       "rust_toolchain": "stable-x86_64-unknown-linux-gnu",
       "wasm_opt_settings": {
@@ -14,10 +14,10 @@
     }
   },
   "contract": {
-    "name": "erc20",
+    "name": "platform",
     "version": "5.0.0",
     "authors": [
-      "Nikolay Kostadinov"
+      "Nikolay Kostadinov, Emil Tsanev"
     ]
   },
   "image": null,
@@ -26,19 +26,17 @@
       {
         "args": [
           {
-            "label": "total_supply",
+            "label": "token_address",
             "type": {
               "displayName": [
-                "Balance"
+                "AccountId"
               ],
-              "type": 0
+              "type": 2
             }
           }
         ],
         "default": false,
-        "docs": [
-          "Creates a new ERC-20 contract with the specified initial supply."
-        ],
+        "docs": [],
         "label": "new",
         "payable": false,
         "returnType": {
@@ -46,7 +44,7 @@
             "ink_primitives",
             "ConstructorResult"
           ],
-          "type": 14
+          "type": 17
         },
         "selector": "0x9bae9d5e"
       }
@@ -69,19 +67,19 @@
         "displayName": [
           "BlockNumber"
         ],
-        "type": 23
+        "type": 25
       },
       "chainExtension": {
         "displayName": [
           "ChainExtension"
         ],
-        "type": 24
+        "type": 26
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 21
+        "type": 24
       },
       "maxEventTopics": 4,
       "staticBufferSize": 16384,
@@ -89,206 +87,134 @@
         "displayName": [
           "Timestamp"
         ],
-        "type": 22
+        "type": 1
       }
     },
-    "events": [
-      {
-        "args": [
-          {
-            "docs": [],
-            "indexed": true,
-            "label": "from",
-            "type": {
-              "displayName": [
-                "Option"
-              ],
-              "type": 20
-            }
-          },
-          {
-            "docs": [],
-            "indexed": true,
-            "label": "to",
-            "type": {
-              "displayName": [
-                "Option"
-              ],
-              "type": 20
-            }
-          },
-          {
-            "docs": [],
-            "indexed": false,
-            "label": "value",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "docs": [
-          "Event emitted when a token transfer occurs."
-        ],
-        "label": "Transfer",
-        "module_path": "erc20::erc20",
-        "signature_topic": "0xb5b61a3e6a21a16be4f044b517c28ac692492f73c5bfd3f60178ad98c767f4cb"
-      },
-      {
-        "args": [
-          {
-            "docs": [],
-            "indexed": true,
-            "label": "owner",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 2
-            }
-          },
-          {
-            "docs": [],
-            "indexed": true,
-            "label": "spender",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 2
-            }
-          },
-          {
-            "docs": [],
-            "indexed": false,
-            "label": "value",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "docs": [
-          "Event emitted when an approval occurs that `spender` is allowed to withdraw",
-          "up to the amount of `value` tokens from `owner`."
-        ],
-        "label": "Approval",
-        "module_path": "erc20::erc20",
-        "signature_topic": "0x1a35e726f5feffda199144f6097b2ba23713e549bfcbe090c0981e3bcdfbcc1d"
-      }
-    ],
+    "events": [],
     "lang_error": {
       "displayName": [
         "ink",
         "LangError"
       ],
-      "type": 15
+      "type": 18
     },
     "messages": [
       {
-        "args": [],
-        "default": false,
-        "docs": [
-          " Returns the total token supply."
-        ],
-        "label": "total_supply",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 16
-        },
-        "selector": "0xdb6375a8"
-      },
-      {
         "args": [
           {
-            "label": "owner",
+            "label": "funding_goal",
             "type": {
               "displayName": [
-                "AccountId"
+                "Balance"
               ],
-              "type": 2
+              "type": 0
+            }
+          },
+          {
+            "label": "deadline",
+            "type": {
+              "displayName": [
+                "Timestamp"
+              ],
+              "type": 1
             }
           }
         ],
         "default": false,
         "docs": [
-          " Returns the account balance for the specified `owner`.",
-          "",
-          " Returns `0` if the account is non-existent."
+          " Initializes new project with `funding_goal` and `deadline`"
         ],
-        "label": "balance_of",
-        "mutates": false,
+        "label": "initialize_project",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 16
+          "type": 19
         },
-        "selector": "0x0f755a56"
+        "selector": "0xdf114c66"
       },
       {
         "args": [
           {
-            "label": "owner",
+            "label": "amount",
             "type": {
               "displayName": [
-                "AccountId"
+                "Balance"
               ],
-              "type": 2
+              "type": 0
             }
           },
           {
-            "label": "spender",
+            "label": "project_id",
             "type": {
               "displayName": [
-                "AccountId"
+                "u128"
               ],
-              "type": 2
+              "type": 0
             }
           }
         ],
         "default": false,
         "docs": [
-          " Returns the amount which `spender` is still allowed to withdraw from `owner`.",
-          "",
-          " Returns `0` if no allowance has been set."
+          " `investor` deposits `amount` of funds in particular `project`"
         ],
-        "label": "allowance",
-        "mutates": false,
+        "label": "invest_funds",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 16
+          "type": 19
         },
-        "selector": "0x6a00165e"
+        "selector": "0x88e02c18"
       },
       {
         "args": [
           {
-            "label": "to",
+            "label": "project_id",
             "type": {
               "displayName": [
-                "AccountId"
+                "u128"
               ],
-              "type": 2
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " When a project became `successful` has raised funds on time",
+          " the `owner` can collect his funds by `withdraw_funds`."
+        ],
+        "label": "withdraw_funds",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 19
+        },
+        "selector": "0xe7cda623"
+      },
+      {
+        "args": [
+          {
+            "label": "project_id",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 0
             }
           },
           {
-            "label": "value",
+            "label": "amount",
             "type": {
               "displayName": [
                 "Balance"
@@ -299,16 +225,9 @@
         ],
         "default": false,
         "docs": [
-          " Transfers `value` amount of tokens from the caller's account to account `to`.",
-          "",
-          " On success a `Transfer` event is emitted.",
-          "",
-          " # Errors",
-          "",
-          " Returns `InsufficientBalance` error if there are not enough tokens on",
-          " the caller's account balance."
+          " Investor in a `project` can revoke `amount` of his deposits."
         ],
-        "label": "transfer",
+        "label": "revoke_funds",
         "mutates": true,
         "payable": false,
         "returnType": {
@@ -316,26 +235,17 @@
             "ink",
             "MessageResult"
           ],
-          "type": 17
+          "type": 19
         },
-        "selector": "0x84a15da1"
+        "selector": "0xe98347cc"
       },
       {
         "args": [
           {
-            "label": "spender",
+            "label": "project_id",
             "type": {
               "displayName": [
-                "AccountId"
-              ],
-              "type": 2
-            }
-          },
-          {
-            "label": "value",
-            "type": {
-              "displayName": [
-                "Balance"
+                "u128"
               ],
               "type": 0
             }
@@ -343,15 +253,10 @@
         ],
         "default": false,
         "docs": [
-          " Allows `spender` to withdraw from the caller's account multiple times, up to",
-          " the `value` amount.",
-          "",
-          " If this function is called again it overwrites the current allowance with",
-          " `value`.",
-          "",
-          " An `Approval` event is emitted."
+          " When a `project` has failed, all investors on that project",
+          " can `refund` their funds by `refund_funds`."
         ],
-        "label": "approve",
+        "label": "refund_funds",
         "mutates": true,
         "payable": false,
         "returnType": {
@@ -359,35 +264,17 @@
             "ink",
             "MessageResult"
           ],
-          "type": 17
+          "type": 19
         },
-        "selector": "0x681266a0"
+        "selector": "0x46974847"
       },
       {
         "args": [
           {
-            "label": "from",
+            "label": "project_id",
             "type": {
               "displayName": [
-                "AccountId"
-              ],
-              "type": 2
-            }
-          },
-          {
-            "label": "to",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 2
-            }
-          },
-          {
-            "label": "value",
-            "type": {
-              "displayName": [
-                "Balance"
+                "u128"
               ],
               "type": 0
             }
@@ -395,32 +282,19 @@
         ],
         "default": false,
         "docs": [
-          " Transfers `value` tokens on the behalf of `from` to the account `to`.",
-          "",
-          " This can be used to allow a contract to transfer tokens on ones behalf and/or",
-          " to charge fees in sub-currencies, for example.",
-          "",
-          " On success a `Transfer` event is emitted.",
-          "",
-          " # Errors",
-          "",
-          " Returns `InsufficientAllowance` error if there are not enough tokens allowed",
-          " for the caller to withdraw from `from`.",
-          "",
-          " Returns `InsufficientBalance` error if there are not enough tokens on",
-          " the account balance of `from`."
+          " Gets project by providing `project_id`"
         ],
-        "label": "transfer_from",
-        "mutates": true,
+        "label": "get_project_by_id",
+        "mutates": false,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 17
+          "type": 22
         },
-        "selector": "0x0b396f18"
+        "selector": "0xbe4185f5"
       }
     ]
   },
@@ -436,44 +310,113 @@
                   "ty": 0
                 }
               },
-              "name": "total_supply"
+              "name": "projects_counter"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "struct": {
+                      "fields": [
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x7ba77142",
+                              "ty": 0
+                            }
+                          },
+                          "name": "invested_funds"
+                        },
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x7ba77142",
+                              "ty": 0
+                            }
+                          },
+                          "name": "funding_goal"
+                        },
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x7ba77142",
+                              "ty": 1
+                            }
+                          },
+                          "name": "deadline"
+                        },
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x7ba77142",
+                              "ty": 2
+                            }
+                          },
+                          "name": "owner"
+                        },
+                        {
+                          "layout": {
+                            "enum": {
+                              "dispatchKey": "0x7ba77142",
+                              "name": "ProjectStatus",
+                              "variants": {
+                                "0": {
+                                  "fields": [],
+                                  "name": "Ongoing"
+                                },
+                                "1": {
+                                  "fields": [],
+                                  "name": "Succeded"
+                                },
+                                "2": {
+                                  "fields": [],
+                                  "name": "Failed"
+                                }
+                              }
+                            }
+                          },
+                          "name": "status"
+                        }
+                      ],
+                      "name": "Project"
+                    }
+                  },
+                  "root_key": "0x7ba77142",
+                  "ty": 5
+                }
+              },
+              "name": "ongoing_projects"
             },
             {
               "layout": {
                 "root": {
                   "layout": {
                     "leaf": {
-                      "key": "0xe7dc2326",
+                      "key": "0xc932e1ef",
                       "ty": 0
                     }
                   },
-                  "root_key": "0xe7dc2326",
-                  "ty": 1
+                  "root_key": "0xc932e1ef",
+                  "ty": 12
                 }
               },
-              "name": "balances"
+              "name": "investors"
             },
             {
               "layout": {
-                "root": {
-                  "layout": {
-                    "leaf": {
-                      "key": "0xb721a0ec",
-                      "ty": 0
-                    }
-                  },
-                  "root_key": "0xb721a0ec",
-                  "ty": 9
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 2
                 }
               },
-              "name": "allowances"
+              "name": "token_address"
             }
           ],
-          "name": "Erc20"
+          "name": "Platform"
         }
       },
       "root_key": "0x00000000",
-      "ty": 13
+      "ty": 16
     }
   },
   "types": [
@@ -489,28 +432,8 @@
       "id": 1,
       "type": {
         "def": {
-          "composite": {}
-        },
-        "params": [
-          {
-            "name": "K",
-            "type": 2
-          },
-          {
-            "name": "V",
-            "type": 0
-          },
-          {
-            "name": "KeyType",
-            "type": 5
-          }
-        ],
-        "path": [
-          "ink_storage",
-          "lazy",
-          "mapping",
-          "Mapping"
-        ]
+          "primitive": "u64"
+        }
       }
     },
     {
@@ -560,12 +483,109 @@
         },
         "params": [
           {
-            "name": "L",
+            "name": "K",
+            "type": 0
+          },
+          {
+            "name": "V",
             "type": 6
           },
           {
+            "name": "KeyType",
+            "type": 8
+          }
+        ],
+        "path": [
+          "ink_storage",
+          "lazy",
+          "mapping",
+          "Mapping"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "type": {
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "name": "invested_funds",
+                "type": 0,
+                "typeName": "Balance"
+              },
+              {
+                "name": "funding_goal",
+                "type": 0,
+                "typeName": "Balance"
+              },
+              {
+                "name": "deadline",
+                "type": 1,
+                "typeName": "Timestamp"
+              },
+              {
+                "name": "owner",
+                "type": 2,
+                "typeName": "AccountId"
+              },
+              {
+                "name": "status",
+                "type": 7,
+                "typeName": "ProjectStatus"
+              }
+            ]
+          }
+        },
+        "path": [
+          "platform",
+          "platform",
+          "Project"
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "Ongoing"
+              },
+              {
+                "index": 1,
+                "name": "Succeded"
+              },
+              {
+                "index": 2,
+                "name": "Failed"
+              }
+            ]
+          }
+        },
+        "path": [
+          "platform",
+          "platform",
+          "ProjectStatus"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": {
+        "def": {
+          "composite": {}
+        },
+        "params": [
+          {
+            "name": "L",
+            "type": 9
+          },
+          {
             "name": "R",
-            "type": 7
+            "type": 10
           }
         ],
         "path": [
@@ -576,7 +596,7 @@
       }
     },
     {
-      "id": 6,
+      "id": 9,
       "type": {
         "def": {
           "composite": {}
@@ -589,7 +609,7 @@
       }
     },
     {
-      "id": 7,
+      "id": 10,
       "type": {
         "def": {
           "composite": {}
@@ -597,7 +617,7 @@
         "params": [
           {
             "name": "ParentKey",
-            "type": 8
+            "type": 11
           }
         ],
         "path": [
@@ -608,7 +628,7 @@
       }
     },
     {
-      "id": 8,
+      "id": 11,
       "type": {
         "def": {
           "tuple": []
@@ -616,7 +636,7 @@
       }
     },
     {
-      "id": 9,
+      "id": 12,
       "type": {
         "def": {
           "composite": {}
@@ -624,7 +644,7 @@
         "params": [
           {
             "name": "K",
-            "type": 10
+            "type": 13
           },
           {
             "name": "V",
@@ -632,7 +652,7 @@
           },
           {
             "name": "KeyType",
-            "type": 11
+            "type": 14
           }
         ],
         "path": [
@@ -644,18 +664,18 @@
       }
     },
     {
-      "id": 10,
+      "id": 13,
       "type": {
         "def": {
           "tuple": [
             2,
-            2
+            0
           ]
         }
       }
     },
     {
-      "id": 11,
+      "id": 14,
       "type": {
         "def": {
           "composite": {}
@@ -663,11 +683,11 @@
         "params": [
           {
             "name": "L",
-            "type": 6
+            "type": 9
           },
           {
             "name": "R",
-            "type": 12
+            "type": 15
           }
         ],
         "path": [
@@ -678,7 +698,7 @@
       }
     },
     {
-      "id": 12,
+      "id": 15,
       "type": {
         "def": {
           "composite": {}
@@ -686,7 +706,7 @@
         "params": [
           {
             "name": "ParentKey",
-            "type": 8
+            "type": 11
           }
         ],
         "path": [
@@ -697,38 +717,43 @@
       }
     },
     {
-      "id": 13,
+      "id": 16,
       "type": {
         "def": {
           "composite": {
             "fields": [
               {
-                "name": "total_supply",
+                "name": "projects_counter",
                 "type": 0,
-                "typeName": "<Balance as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<375105693u32, ()>,>>::Type"
+                "typeName": "<u128 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<3797810326u32, ()>,>>::Type"
               },
               {
-                "name": "balances",
-                "type": 1,
-                "typeName": "<Mapping<AccountId, Balance> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<639884519u32, ()\n>,>>::Type"
+                "name": "ongoing_projects",
+                "type": 5,
+                "typeName": "<Mapping<u128, Project> as::ink::storage::traits::AutoStorableHint\n<::ink::storage::traits::ManualKey<1114744699u32, ()>,>>::Type"
               },
               {
-                "name": "allowances",
-                "type": 9,
-                "typeName": "<Mapping<(AccountId, AccountId), Balance> as::ink::storage::traits\n::AutoStorableHint<::ink::storage::traits::ManualKey<\n3969917367u32, ()>,>>::Type"
+                "name": "investors",
+                "type": 12,
+                "typeName": "<Mapping<(AccountId, u128), Balance> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<4024513225u32,\n()>,>>::Type"
+              },
+              {
+                "name": "token_address",
+                "type": 2,
+                "typeName": "<AccountId as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<3667269637u32, ()>,>>::Type"
               }
             ]
           }
         },
         "path": [
-          "erc20",
-          "erc20",
-          "Erc20"
+          "platform",
+          "platform",
+          "Platform"
         ]
       }
     },
     {
-      "id": 14,
+      "id": 17,
       "type": {
         "def": {
           "variant": {
@@ -736,7 +761,7 @@
               {
                 "fields": [
                   {
-                    "type": 8
+                    "type": 11
                   }
                 ],
                 "index": 0,
@@ -745,7 +770,7 @@
               {
                 "fields": [
                   {
-                    "type": 15
+                    "type": 18
                   }
                 ],
                 "index": 1,
@@ -757,11 +782,11 @@
         "params": [
           {
             "name": "T",
-            "type": 8
+            "type": 11
           },
           {
             "name": "E",
-            "type": 15
+            "type": 18
           }
         ],
         "path": [
@@ -770,7 +795,7 @@
       }
     },
     {
-      "id": 15,
+      "id": 18,
       "type": {
         "def": {
           "variant": {
@@ -789,157 +814,197 @@
       }
     },
     {
-      "id": 16,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 0
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 15
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 0
-          },
-          {
-            "name": "E",
-            "type": 15
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 17,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 18
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 15
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 18
-          },
-          {
-            "name": "E",
-            "type": 15
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 18,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 8
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 19
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 8
-          },
-          {
-            "name": "E",
-            "type": 19
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
       "id": 19,
       "type": {
         "def": {
           "variant": {
             "variants": [
               {
+                "fields": [
+                  {
+                    "type": 20
+                  }
+                ],
                 "index": 0,
-                "name": "InsufficientBalance"
+                "name": "Ok"
               },
               {
+                "fields": [
+                  {
+                    "type": 18
+                  }
+                ],
                 "index": 1,
-                "name": "InsufficientAllowance"
+                "name": "Err"
               }
             ]
           }
         },
+        "params": [
+          {
+            "name": "T",
+            "type": 20
+          },
+          {
+            "name": "E",
+            "type": 18
+          }
+        ],
         "path": [
-          "erc20",
-          "erc20",
-          "Error"
+          "Result"
         ]
       }
     },
     {
       "id": 20,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 11
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 21
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 11
+          },
+          {
+            "name": "E",
+            "type": 21
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 21,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "TransferFailed"
+              },
+              {
+                "index": 1,
+                "name": "NotExistingProject"
+              },
+              {
+                "index": 2,
+                "name": "DeadlineExceeded"
+              },
+              {
+                "index": 3,
+                "name": "ZeroAmount"
+              },
+              {
+                "index": 4,
+                "name": "FailedCalculation"
+              },
+              {
+                "index": 5,
+                "name": "NotProjectOwner"
+              },
+              {
+                "index": 6,
+                "name": "ProjectFinished"
+              },
+              {
+                "index": 7,
+                "name": "ProjectNotSuccesfull"
+              },
+              {
+                "index": 8,
+                "name": "ProjectNotFailed"
+              },
+              {
+                "index": 9,
+                "name": "NotInvestorInProject"
+              },
+              {
+                "index": 10,
+                "name": "InvalidDeadline"
+              },
+              {
+                "index": 11,
+                "name": "InvalidAmount"
+              }
+            ]
+          }
+        },
+        "path": [
+          "platform",
+          "platform",
+          "Error"
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 23
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 18
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 23
+          },
+          {
+            "name": "E",
+            "type": 18
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 23,
       "type": {
         "def": {
           "variant": {
@@ -951,7 +1016,7 @@
               {
                 "fields": [
                   {
-                    "type": 2
+                    "type": 6
                   }
                 ],
                 "index": 1,
@@ -963,7 +1028,7 @@
         "params": [
           {
             "name": "T",
-            "type": 2
+            "type": 6
           }
         ],
         "path": [
@@ -972,7 +1037,7 @@
       }
     },
     {
-      "id": 21,
+      "id": 24,
       "type": {
         "def": {
           "composite": {
@@ -992,15 +1057,7 @@
       }
     },
     {
-      "id": 22,
-      "type": {
-        "def": {
-          "primitive": "u64"
-        }
-      }
-    },
-    {
-      "id": 23,
+      "id": 25,
       "type": {
         "def": {
           "primitive": "u32"
@@ -1008,7 +1065,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 26,
       "type": {
         "def": {
           "variant": {}

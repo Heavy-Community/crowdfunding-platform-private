@@ -8,12 +8,6 @@ import Sidebar from './components/Sidebar';
 import Faucet from './pages/Faucet';
 import Platform from './pages/Platform';
 
-const rococoContracts: SubstrateChain = {
-    name: 'rococo-contracts',
-    network: 'rococo-contract',
-    rpcUrls: ['wss://rococo-contracts-rpc.polkadot.io']
-};
-
 const App: React.FC = () => {
     const [balance, setBalance] = useState<string | null>(null);
 
@@ -25,7 +19,8 @@ const App: React.FC = () => {
     return (
         <UseInkathonProvider
             appName="Crowdfunding Platform"
-            defaultChain={rococoContracts}
+            connectOnInit={true}
+            defaultChain="alephzero-testnet"
         >
             <Router>
                 <Box sx={{ display: 'flex' }}>
