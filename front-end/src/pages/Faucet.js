@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 import { Button, TextField, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
 import { styled } from '@mui/system';
-import { ContractPromise } from '@polkadot/api-contract';
-import faucetAbi from '../contracts/faucetAbi.json';
-import erc20Abi from '../contracts/erc20Abi.json';
+
+import { ContractIds } from '../deployments/deployments'
+import toast from 'react-hot-toast'
+
+import {
+  contractQuery,
+  decodeOutput,
+  useInkathon,
+  useRegisteredContract,
+} from '@scio-labs/use-inkathon'
 
 const InputContainer = styled(Box)({
     display: 'flex',
@@ -82,60 +89,88 @@ const TokenListItem = styled(ListItem)({
     },
 });
 
-const Faucet = ({ balance, setBalance }) => {
-    const [api, setApi] = useState(null);
-    const [account, setAccount] = useState(null);
-    const [tokenContractAddress, setTokenContractAddress] = useState('');
-    const [withdrawingAmount, setWithdrawingAmount] = useState('');
+const Faucet = () => {
+    // const [api, setApi] = useState(null);
+    const { api, activeAccount, activeSigner } = useInkathon();
+
+    // Our ERC-20 token tokenContract and address
+    const { tokenContract, tokenContractAddress } = useRegisteredContract(ContractIds.ERC20);
+
+    // Current balance of the user
+    const [balance, setBalance] = useState('');
+
+    // Flag whether balance is loading (because of the async function)
+    const [fetchIsLoading, setFetchIsLoading] = useState('');
+
+    // Adding tokens' names to the list functionality
     const [tokenName, setTokenName] = useState('');
+
+    // Adding tokens' names to the list functionality
+    const [newTokenContractAddress, setNewTokenContractAddress] = useState('');
+
+    // Adding tokens' withdraw amount to the list functionality
+    const [withdrawingAmount, setWithdrawingAmount] = useState('');
+
+    // Tokens list
     const [tokens, setTokens] = useState([
-        { name: 'ERC20 Token', address: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu', amount: '420' },
-        { name: 'KRIS Token', address: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu', amount: '69' }
+        { name: 'ERC20 Token (Currently implemented)', address: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu', amount: '420' },
     ]);
 
+    // Fetch Greeting
+  const fetchBalance = async () => {
+    if (!tokenContract || !api || !activeAccount) return
+
+    setFetchIsLoading(true)
+    try {
+      const result = await contractQuery(api, '', tokenContract, 'balanceOf', activeAccount)
+      const { output, isError, decodedOutput } = decodeOutput(result, tokenContract, 'balanceOf')
+      if (isError) throw new Error(decodedOutput)
+      setBalance(output)
+
+      // NOTE: Currently disabled until `typechain-polkadot` dependencies are upted to support ink! v5
+      // Alternatively: Fetch it with typed tokenContract instance
+      // const typedResult = await typedContract.query.greet()
+      // console.log('Result from typed tokenContract: ', typedResult.value)
+    } catch (e) {
+      console.error(e)
+      toast.error('Error while fetching greeting. Try again…')
+      setBalance(undefined)
+    } finally {
+      setFetchIsLoading(false)
+    }
+  }
+  useEffect(() => {
+    fetchBalance()
+  }, [tokenContract])
+
     useEffect(() => {
-        document.body.style = 'background: #121212;';
-        const init = async () => {
-            const extensions = await web3Enable('my-dapp');
-            if (extensions.length === 0) return;
-            const allAccounts = await web3Accounts();
-            setAccount(allAccounts[0]);
-            const provider = new WsProvider('wss://rococo-rpc.polkadot.io');
-            const api = await ApiPromise.create({ provider });
-            setApi(api);
-        };
-        init();
-    }, []);
+        fetchBalance();
+        if (balance) {
+            setBalance(balance.toString());
+        }
+    }, [balance]);
 
     const handleAddTokenType = async () => {
-        if (!api || !account || !tokenContractAddress || !withdrawingAmount || !tokenName) return;
-        const injector = await web3FromAddress(account.address);
+        if (!api || !activeAccount || !faucetContractAddress || !withdrawingAmount || !tokenName) return;
+        const injector = await web3FromAddress(activeAccount.address);
         const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
-        const faucetContract = new ContractPromise(api, faucetAbi, faucetContractAddress);
+        // Rework to use inkathon
+        // const faucetContract = new ContractPromise(api, faucetAbi, faucetContractAddress);
 
-        await faucetContract.tx.addTokenType({ value: 0, gasLimit: -1 }, tokenContractAddress, withdrawingAmount)
-            .signAndSend(account.address, { signer: injector.signer });
+        await faucetContract.tx.addTokenType({ value: 0, gasLimit: -1 }, newTokenContractAddress, withdrawingAmount)
+            .signAndSend(activeAccount.address, { signer: injector.signer });
 
-        setTokens([...tokens, { name: tokenName, address: tokenContractAddress, amount: withdrawingAmount }]);
+        setTokens([...tokens, { name: tokenName, address: newTokenContractAddress, amount: withdrawingAmount }]);
     };
 
     const handleRequestTokens = async (tokenAddress) => {
-        if (!api || !account || !tokenAddress) return;
-        const injector = await web3FromAddress(account.address);
+        if (!api || !activeAccount || !tokenAddress) return;
+        const injector = await web3FromAddress(activeAccount.address);
         const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
-        const faucetContract = new ContractPromise(api, faucetAbi, faucetContractAddress);
+        // const faucetContract = new ContractPromise(api, faucetAbi, faucetContractAddress);
 
-        await faucetContract.tx.requestTokens({ value: 0, gasLimit: -1 }, tokenAddress)
-            .signAndSend(account.address, { signer: injector.signer });
-        fetchBalance(tokenAddress);
-    };
-
-    const fetchBalance = async (tokenAddress) => {
-        if (!api || !account || !tokenAddress) return;
-        const contract = new ContractPromise(api, erc20Abi, tokenAddress);
-
-        const balance = await contract.query.balanceOf(account.address, { value: 0, gasLimit: -1 }, account.address);
-        setBalance(balance.output.toString());
+        await faucetContract.tx.requestTokens({ value: 0, gasLimit: 0 }, tokenAddress)
+            .signAndSend(activeAccount.address, { signer: injector.signer });
     };
 
     return (
@@ -163,8 +198,8 @@ const Faucet = ({ balance, setBalance }) => {
                 <InputField
                     label="Token Contract Address"
                     variant="outlined"
-                    value={tokenContractAddress}
-                    onChange={(e) => setTokenContractAddress(e.target.value)}
+                    value={newTokenContractAddress}
+                    onChange={(e) => setNewTokenContractAddress(e.target.value)}
                     InputProps={{
                         style: {
                             color: '#C0C0C0',

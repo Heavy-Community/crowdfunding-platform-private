@@ -8,6 +8,7 @@ import Platform from './pages/Platform';
 function App() {
     const [balance, setBalance] = useState(null);
 
+    // Set the Background to black
     document.body.style = 'background: #121212;'; // A little hacky but gets the job done
 
     return (
