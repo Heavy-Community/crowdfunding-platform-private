@@ -1,10 +1,10 @@
 {
   "source": {
-    "hash": "0x850a00c49e4ea80e21719023e00f4325d873de65c9c1680e599b09827dfd91f2",
+    "hash": "0xf3a882a91ccbf65d11d8c1098fbdf4a697436548eee4b57da140fe3c7345bb91",
     "language": "ink! 5.0.0",
     "compiler": "rustc 1.77.2",
     "build_info": {
-      "build_mode": "Debug",
+      "build_mode": "Release",
       "cargo_contract_version": "4.1.1",
       "rust_toolchain": "stable-x86_64-unknown-linux-gnu",
       "wasm_opt_settings": {
@@ -67,19 +67,19 @@
         "displayName": [
           "BlockNumber"
         ],
-        "type": 25
+        "type": 26
       },
       "chainExtension": {
         "displayName": [
           "ChainExtension"
         ],
-        "type": 26
+        "type": 27
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 24
+        "type": 25
       },
       "maxEventTopics": 4,
       "staticBufferSize": 16384,
@@ -90,7 +90,201 @@
         "type": 1
       }
     },
-    "events": [],
+    "events": [
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "project",
+            "type": {
+              "displayName": [
+                "Project"
+              ],
+              "type": 6
+            }
+          },
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "owner",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 24
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when a new `project` is initialized by `owner`."
+        ],
+        "label": "InitializeProject",
+        "module_path": "platform::platform",
+        "signature_topic": "0xaae7480bb03251b2983d2a49eb9938b42d94b8692be2982f8c28a99a666ee3da"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "project",
+            "type": {
+              "displayName": [
+                "Project"
+              ],
+              "type": 6
+            }
+          },
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "investor",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 24
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when a new investment in a particular `project` occurs."
+        ],
+        "label": "InvestFunds",
+        "module_path": "platform::platform",
+        "signature_topic": "0x105cb34b3cf320039608bded364f9f225272c257dd038d3a2e74386d28b261f9"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "project",
+            "type": {
+              "displayName": [
+                "Project"
+              ],
+              "type": 6
+            }
+          },
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "owner",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 24
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when the funds from a successful `project` are withdrawn by the `owner`."
+        ],
+        "label": "WithdrawFunds",
+        "module_path": "platform::platform",
+        "signature_topic": "0x051f3a5fef133ba6075f0e2487c1b7a22f88f06883429bc251f89934a4e60cde"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "project",
+            "type": {
+              "displayName": [
+                "Project"
+              ],
+              "type": 6
+            }
+          },
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "investor",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 24
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when the `amount` of an investment revocation occurs by an `investor` in a particular `project`."
+        ],
+        "label": "RevokeFunds",
+        "module_path": "platform::platform",
+        "signature_topic": "0x938d5713b61a19d80d41d05164fded8db1225e0160a382477f66311775af2875"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "project",
+            "type": {
+              "displayName": [
+                "Project"
+              ],
+              "type": 6
+            }
+          },
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "investor",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 24
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when the entire `amount` of investments is refunded from a particular failed `project` by an `investor`."
+        ],
+        "label": "RefundFunds",
+        "module_path": "platform::platform",
+        "signature_topic": "0xd8ace8635e76ba46a0f68b3053b65e07ff4b39a9cf93b437f24567597a95d5fd"
+      }
+    ],
     "lang_error": {
       "displayName": [
         "ink",
@@ -1040,6 +1234,39 @@
       "id": 24,
       "type": {
         "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "None"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 2
+                  }
+                ],
+                "index": 1,
+                "name": "Some"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 2
+          }
+        ],
+        "path": [
+          "Option"
+        ]
+      }
+    },
+    {
+      "id": 25,
+      "type": {
+        "def": {
           "composite": {
             "fields": [
               {
@@ -1057,7 +1284,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 26,
       "type": {
         "def": {
           "primitive": "u32"
@@ -1065,7 +1292,7 @@
       }
     },
     {
-      "id": 26,
+      "id": 27,
       "type": {
         "def": {
           "variant": {}

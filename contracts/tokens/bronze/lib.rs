@@ -50,7 +50,6 @@ mod bronze_token {
 
         #[ink(message)]
         pub fn transfer(&mut self, to: AccountId, amount: Balance) -> Result<()> {
-            // TODO: think of better way to fill `Faucet` with tokens
             if self.env().caller() != self.faucet_address
                 && self.env().caller() != self.deploy_address
             {
