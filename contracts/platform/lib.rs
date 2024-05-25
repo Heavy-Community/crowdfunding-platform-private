@@ -240,6 +240,12 @@ mod platform {
             project.is_over_the_deadline(self.env().block_timestamp());
             self.ongoing_projects.insert(project_id, &project);
 
+            self.env().emit_event(InvestFunds {
+                project,
+                investor: Some(investor),
+                amount,
+            });
+
             // Transfer the invested `amount` to platform's address
             let mut call_flags = ink::env::CallFlags::empty();
             call_flags.set(CallFlags::TAIL_CALL, true);
@@ -262,12 +268,6 @@ mod platform {
             if transfer_result.is_err() {
                 return Err(Error::TransferFailed);
             }
-
-            self.env().emit_event(InvestFunds {
-                project,
-                investor: Some(investor),
-                amount,
-            });
 
             Ok(())
         }
@@ -293,6 +293,11 @@ mod platform {
             // Remove from the map of projects
             self.ongoing_projects.remove(project_id);
 
+            self.env().emit_event(WithdrawFunds {
+                project,
+                owner: Some(owner),
+            });
+
             // Transfer the invested `reached_funding` to the project owner
             let mut call_flags = ink::env::CallFlags::empty();
             call_flags.set(CallFlags::TAIL_CALL, true);
@@ -314,11 +319,6 @@ mod platform {
             if transfer_result.is_err() {
                 return Err(Error::TransferFailed);
             }
-
-            self.env().emit_event(WithdrawFunds {
-                project,
-                owner: Some(owner),
-            });
 
             Ok(())
         }
@@ -357,6 +357,12 @@ mod platform {
 
             let project = self.ongoing_projects.get(project_id).unwrap();
 
+            self.env().emit_event(RevokeFunds {
+                project,
+                investor: Some(investor),
+                amount,
+            });
+
             // Transfer the `amount_invested` previously by `investor` back to him
             let mut call_flags = ink::env::CallFlags::empty();
             call_flags.set(CallFlags::TAIL_CALL, true);
@@ -378,12 +384,6 @@ mod platform {
             if transfer_result.is_err() {
                 return Err(Error::TransferFailed);
             }
-
-            self.env().emit_event(RevokeFunds {
-                project,
-                investor: Some(investor),
-                amount,
-            });
 
             Ok(())
         }
@@ -412,6 +412,12 @@ mod platform {
                 self.ongoing_projects.insert(project_id, &project);
             }
 
+            self.env().emit_event(RefundFunds {
+                project,
+                investor: Some(investor),
+                amount: amount_invested,
+            });
+
             // Transfer the `amount_invested` previously by `investor` back to him
             let mut call_flags = ink::env::CallFlags::empty();
             call_flags.set(CallFlags::TAIL_CALL, true);
@@ -433,12 +439,6 @@ mod platform {
             if transfer_result.is_err() {
                 return Err(Error::TransferFailed);
             }
-
-            self.env().emit_event(RefundFunds {
-                project,
-                investor: Some(investor),
-                amount: amount_invested,
-            });
 
             Ok(())
         }
