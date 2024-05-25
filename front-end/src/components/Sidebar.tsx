@@ -1,4 +1,4 @@
-import { FC, useState} from 'react';
+import { FC, useState, useEffect } from 'react';
 import { Drawer, List, ListItem, ListItemText, Toolbar, Typography, Divider, Box, Button } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/system';
@@ -95,6 +95,10 @@ const Sidebar: FC = () => {
             console.log("BALANCE: ", balance);
         }
     };
+
+    useEffect(() => {
+        fetchBalance();
+    }, [tokenContract, api, activeAccount]);
 
     return (
         <StyledDrawer variant="permanent">

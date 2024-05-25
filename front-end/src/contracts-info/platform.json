@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xf3a882a91ccbf65d11d8c1098fbdf4a697436548eee4b57da140fe3c7345bb91",
+    "hash": "0x8aa6d1618fae18e40a499eb9fc08e3f36004b69293219c615aa7355d81a4e4af",
     "language": "ink! 5.0.0",
     "compiler": "rustc 1.77.2",
     "build_info": {
@@ -67,19 +67,19 @@
         "displayName": [
           "BlockNumber"
         ],
-        "type": 26
+        "type": 27
       },
       "chainExtension": {
         "displayName": [
           "ChainExtension"
         ],
-        "type": 27
+        "type": 28
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 25
+        "type": 26
       },
       "maxEventTopics": 4,
       "staticBufferSize": 16384,
@@ -112,7 +112,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 24
+              "type": 25
             }
           }
         ],
@@ -144,7 +144,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 24
+              "type": 25
             }
           },
           {
@@ -187,7 +187,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 24
+              "type": 25
             }
           }
         ],
@@ -219,7 +219,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 24
+              "type": 25
             }
           },
           {
@@ -262,7 +262,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 24
+              "type": 25
             }
           },
           {
@@ -489,6 +489,24 @@
           "type": 22
         },
         "selector": "0xbe4185f5"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " Gets project counter"
+        ],
+        "label": "get_project_counter",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 24
+        },
+        "selector": "0x4c5227fd"
       }
     ]
   },
@@ -1237,6 +1255,48 @@
           "variant": {
             "variants": [
               {
+                "fields": [
+                  {
+                    "type": 0
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 18
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 0
+          },
+          {
+            "name": "E",
+            "type": 18
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 25,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
                 "index": 0,
                 "name": "None"
               },
@@ -1264,7 +1324,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 26,
       "type": {
         "def": {
           "composite": {
@@ -1284,7 +1344,7 @@
       }
     },
     {
-      "id": 26,
+      "id": 27,
       "type": {
         "def": {
           "primitive": "u32"
@@ -1292,7 +1352,7 @@
       }
     },
     {
-      "id": 27,
+      "id": 28,
       "type": {
         "def": {
           "variant": {}

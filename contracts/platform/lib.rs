@@ -449,6 +449,12 @@ mod platform {
             self.ongoing_projects.get(project_id)
         }
 
+        #[ink(message)]
+        /// Gets project counter
+        pub fn get_project_counter(&self) -> u128 {
+            self.projects_counter
+        }
+
         /// Checks if the caller is the `owner` of the `project_id`.
         fn is_project_owner(&self, owner: AccountId, project_id: u128) -> Result<()> {
             if owner == self.ongoing_projects.get(project_id).unwrap().owner {
