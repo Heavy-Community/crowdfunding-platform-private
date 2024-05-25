@@ -1,26 +1,15 @@
-import { SubstrateDeployment } from '@scio-labs/use-inkathon'
+import TokenJson from '../contracts-info/token.json'
+import FaucetJson from '../contracts-info/faucet.json'
+import PlatformJson from '../contracts-info/platform.json'
 
-/**
-* Add or change your custom contract ids here
-* DOCS: https://github.com/scio-labs/inkathon#2-custom-contracts
-*/
-export enum ContractIds {
-    Token = 'token',
-    Faucet = 'faucet',
-    Platform = 'platform'
+export const TokenAbi = TokenJson as Record<string, any>;
+export const FaucetAbi = FaucetJson as Record<string, any>;
+export const PlatformAbi = PlatformJson as Record<string, any>;
+
+export enum ContractsAddresses {
+    Token = '5FcewiPMSveFJxgxyqNmwRCvRj7nSp4HcZriyaHzk3jexFxw',
+    // TODO: Change with real address of the deployed contracts
+    Faucet = '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu',
+    Platform = '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu',
 }
 
-export const getDeployments = async (): Promise<SubstrateDeployment[]> => {
-    const deployments: SubstrateDeployment[] = []
-
-    const networkId: string = 'contracts-rococo'
-
-    for (const contractId of Object.values(ContractIds)) {
-        const abi = await import(`../contracts-info/${contractId}.json`)
-        const { address } = await import(`../contracts-info/${contractId}.ts`)
-
-        deployments.push({ contractId, networkId, abi, address })
-    }
-
-    return deployments
-}

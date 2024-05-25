@@ -10,14 +10,18 @@ import { web3Accounts, web3FromAddress } from '@polkadot/extension-dapp';
 import { Button, TextField, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
 import { styled } from '@mui/system';
 
-import { ContractIds } from '../deployments/deployments'
+import {
+    ContractsAddresses,
+    TokenAbi,
+    FaucetAbi
+} from '../deployments/deployments'
 import toast from 'react-hot-toast';
 
 import {
     contractQuery,
     decodeOutput,
     useInkathon,
-    useRegisteredContract,
+    useContract
 } from '@scio-labs/use-inkathon';
 
 const InputContainer = styled(Box)({
@@ -103,7 +107,10 @@ interface Token {
 
 const Faucet: FC = () => {
     const { api, activeAccount, activeSigner } = useInkathon();
-    const { contract: tokenContract, address: tokenContractAddress } = useRegisteredContract(ContractIds.Token)
+    console.log("profile: ", activeAccount);
+
+    const { contract: tokenContract, address: tokenContractAddress } = useContract(TokenAbi, ContractsAddresses.Token);
+    const { contract: faucetContract, address: faucetContractAddress } = useContract(FaucetAbi, ContractsAddresses.Faucet);
 
     const [balance, setBalance] = useState<string>('');
     const [fetchIsLoading, setFetchIsLoading] = useState<boolean>(false);
@@ -112,7 +119,7 @@ const Faucet: FC = () => {
     const [withdrawingAmount, setWithdrawingAmount] = useState<string>('');
 
     const [tokens, setTokens] = useState<Token[]>([
-        { name: 'ERC20 Token (Currently implemented)', address: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu', amount: '420' },
+        { name: 'ERC20 Token (Currently implemented)', address: '5FcewiPMSveFJxgxyqNmwRCvRj7nSp4HcZriyaHzk3jexFxw', amount: '420' },
     ]);
 
     const fetchBalance = async () => {
@@ -124,13 +131,14 @@ const Faucet: FC = () => {
 
             const { output, isError, decodedOutput } = decodeOutput(result, tokenContract, 'balanceOf');
             if (isError) throw new Error(decodedOutput);
-            setBalance(output?.toString() || '');
+            setBalance(output?.toString() || '0');
         } catch (e) {
             console.error(e);
             toast.error('Error while fetching balance. Try again…');
-            setBalance('');
+            setBalance('0');
         } finally {
             setFetchIsLoading(false);
+            console.log("BALANCE: ", balance);
         }
     };
 
@@ -140,30 +148,32 @@ const Faucet: FC = () => {
 
     const handleAddTokenType = async () => {
         if (!api || !activeAccount || !newTokenContractAddress || !withdrawingAmount || !tokenName) return;
-        const injector = await web3FromAddress(activeAccount.address);
-        const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
+        /// TODO: REWORK
+        // const injector = await web3FromAddress(activeAccount.address);
+        // const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
 
-        await api.tx.contracts.call(
-            faucetContractAddress,
-            0,
-            -1,
-            api.tx.contracts.encodeContractCall('addTokenType', newTokenContractAddress, withdrawingAmount)
-        ).signAndSend(activeAccount.address, { signer: injector.signer });
+        // await api.tx.contracts.call(
+        //     faucetContractAddress,
+        //     0,
+        //     -1,
+        //     api.tx.contracts.encodeContractCall('addTokenType', newTokenContractAddress, withdrawingAmount)
+        // ).signAndSend(activeAccount.address, { signer: injector.signer });
 
         setTokens([...tokens, { name: tokenName, address: newTokenContractAddress, amount: withdrawingAmount }]);
     };
 
     const handleRequestTokens = async (tokenAddress: string) => {
-        if (!api || !activeAccount || !tokenAddress) return;
-        const injector = await web3FromAddress(activeAccount.address);
-        const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
+        if (!api || !activeAccount || !tokenAddress || !faucetContractAddress) return;
+        /// TODO: REWORK
+        // const injector = await web3FromAddress(activeAccount.address);
+        // const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
 
-        await api.tx.contracts.call(
-            faucetContractAddress,
-            0,
-            -1,
-            api.tx.contracts.encodeContractCall('requestTokens', tokenAddress)
-        ).signAndSend(activeAccount.address, { signer: injector.signer });
+        // await api.tx.contracts.call(
+        //     faucetContractAddress,
+        //     0,
+        //     -1,
+        //     api.tx.contracts.encodeContractCall('requestTokens', tokenAddress)
+        // ).signAndSend(activeAccount.address, { signer: injector.signer });
 
         fetchBalance();
     };
