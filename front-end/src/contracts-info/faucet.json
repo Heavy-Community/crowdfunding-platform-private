@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x29aba790ad4edd6e4b3bcc1dda12c0c6371f78f14eed2b9b5a89aa3e60637a5b",
+    "hash": "0x9221dc150cb2f476450f7bd6b1d15300b234ed53dd678494ca08f6ceabad950b",
     "language": "ink! 5.0.0",
     "compiler": "rustc 1.77.2",
     "build_info": {
@@ -120,11 +120,43 @@
           }
         ],
         "docs": [
-          "Event emitted when a token transfer occurs."
+          "Event emitted when a token given occurs."
         ],
         "label": "TokensGiven",
         "module_path": "faucet::faucet",
         "signature_topic": "0xb260c150ed8867681b206feac056df102b8a99c278a36323f3afb85961f4d14b"
+      },
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "token",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 22
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "label": "withdraw_amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 10
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when a new token type is added"
+        ],
+        "label": "TokenAdded",
+        "module_path": "faucet::faucet",
+        "signature_topic": "0xd87132f689a9fffc3322f8fb5735b288624ac286c53b26191ec226f9e7e95e2e"
       }
     ],
     "lang_error": {

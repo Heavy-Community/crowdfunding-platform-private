@@ -119,7 +119,7 @@ const Faucet: FC = () => {
     const [withdrawingAmount, setWithdrawingAmount] = useState<string>('');
 
     const [tokens, setTokens] = useState<Token[]>([
-        { name: 'ERC20 Token (Currently implemented)', address: '5FcewiPMSveFJxgxyqNmwRCvRj7nSp4HcZriyaHzk3jexFxw', amount: '420' },
+        { name: 'ERC20 Token (Currently supported)', address: ContractsAddresses.Token, amount: '420' },
     ]);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -129,19 +129,28 @@ const Faucet: FC = () => {
     const { register, reset, handleSubmit } = form;
 
     const handleAddTokenType = async () => {
-        if (!api || !activeAccount || !tokenContractAddress || !withdrawingAmount || !tokenName) return;
-        /// TODO: REWORK
-        // const injector = await web3FromAddress(activeAccount.address);
-        // const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
+        if (!api || !activeAccount || !faucetContract) {
+            toast.error('Wallet not connected or not existing Faucet contract. Try again…');
+            return;
+        }
 
-        // await api.tx.contracts.call(
-        //     faucetContractAddress,
-        //     0,
-        //     -1,
-        //     api.tx.contracts.encodeContractCall('addTokenType', tokenContractAddress, withdrawingAmount)
-        // ).signAndSend(activeAccount.address, { signer: injector.signer });
+        if (!tokenContractAddress || !withdrawingAmount) {
+            toast.error('Token contract address or withdrawing amount not provided!');
+            return;
+        }
 
-        setTokens([...tokens, { name: tokenName, address: tokenContractAddress, amount: withdrawingAmount }]);
+        try {
+            await contractTxWithToast(api, activeAccount.address, faucetContract, 'addTokenType', {}, [
+                    tokenContractAddress,
+                    parseFloat(withdrawingAmount),
+            ])
+                reset()
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setTokens([...tokens, { name: tokenName, address: tokenContractAddress, amount: withdrawingAmount }]);
+        }
+
     };
 
     const handleRequestTokens = async (tokenAddress: string) => {
@@ -158,7 +167,6 @@ const Faucet: FC = () => {
         } catch (e) {
             console.error(e)
         } finally {
-            // fetchGreeting()
         }
     };
 

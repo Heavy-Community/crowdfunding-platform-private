@@ -25,8 +25,8 @@ mod faucet {
         NextAccessTimeCalculation,
     }
 
-    /// 1 hour of wait time
-    const WAIT_TIME: Timestamp = 3600;
+    /// 1 minute of wait time (for testing)
+    const WAIT_TIME: Timestamp = 60000;
 
     /// The Faucet result type.
     pub type Result<T> = core::result::Result<T, Error>;
@@ -42,6 +42,14 @@ mod faucet {
         #[ink(topic)]
         token: Option<AccountId>,
         amount: Balance,
+    }
+
+    /// Event emitted when a new token type is added
+    #[ink(event)]
+    pub struct TokenAdded {
+        #[ink(topic)]
+        token: Option<AccountId>,
+        withdraw_amount: Balance,
     }
 
     #[ink(storage)]
@@ -76,6 +84,12 @@ mod faucet {
             }
             self.tokens_withdraw_amount
                 .insert(token_contract, &withdrawing_amount);
+
+            self.env().emit_event(TokenAdded {
+                token: Some(token_contract),
+                withdraw_amount: withdrawing_amount,
+            });
+
             Ok(())
         }
 
