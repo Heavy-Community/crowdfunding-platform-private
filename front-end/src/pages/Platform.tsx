@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useState, useRef } from 'react';
+import { FC, useState, useRef, useEffect } from 'react';
 import {
     Box,
     TextField,
@@ -11,6 +11,8 @@ import {
     CardActions,
     Grid,
 } from '@mui/material';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { styled } from '@mui/system';
 import { SnackbarProvider, useSnackbar } from 'notistack';
@@ -123,25 +125,29 @@ interface Project {
     name: string;
     projectId: number;
     fundingGoal: string;
-    deadline: string;
+    deadline: Date;
     investedFunds: string;
 }
 
 const Platform: FC = () => {
     const [projectName, setProjectName] = useState<string>('');
     const [fundingGoal, setFundingGoal] = useState<string>('');
-    const [deadline, setDeadline] = useState<string>('');
+    // const [deadline, setDeadline] = useState<string>('');
+    const [deadline, setDeadline] = useState<Date | null>(new Date());
+
 
     // Approve button
     const [tokenAmount, setTokenAmount] = useState<string>('');
 
     const [projects, setProjects] = useState<Project[]>([
-        { name: 'Sample project', projectId: 2, fundingGoal: '420', 'deadline': "June 8 2024", investedFunds: '1',  },
+        { name: 'Meme coin project', projectId: 1, fundingGoal: '69420', deadline: new Date('2024-09-30'), investedFunds: '0',  },
+        { name: 'Blood coin - Populate blood donation', projectId: 2, fundingGoal: '1000000', deadline: new Date('2025-07-24'), investedFunds: '0',  },
     ]);
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const projectCounter = useRef<number>(1);
+    const [projectCounter, setProjectCounter] = useState<number>(0);
+
 
     const { api, activeAccount } = useInkathon();
     const { contract: platformContract, address: platformContractAddress} = useContract(PlatformAbi, ContractsAddresses.Platform);
@@ -183,6 +189,35 @@ const Platform: FC = () => {
         }
     };
 
+    const fetchProjectCounter = async () => {
+        if (!platformContract || !api || !activeAccount) return;
+
+        setFetchIsLoading(true);
+        try {
+            console.log("Fetching info for last project id");
+            const result = await contractQuery(api, activeAccount.address, platformContract, 'getProjectCounter', {} as any, [])
+
+            const { output, isError, decodedOutput } = decodeOutput(result, platformContract, 'getProjectCounter');
+            if (isError) throw new Error(decodedOutput);
+            console.log(output);
+            setProjectCounter(parseInt(output.toString()) || 0);
+        } catch (e) {
+            console.error(e);
+            toast.error('Error while fetching project info. Try again…');
+            setProjectCounter(0);
+        } finally {
+            setFetchIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        // Hard-coded but gets the job done
+        fetchProjectInfo(1);
+        fetchProjectInfo(2);
+
+        fetchProjectCounter();
+    }, [platformContract, api, activeAccount]);
+
     const handleApproveSpendingTokens = async (tokenAmount: number) => {
         // make approve transaction to token contract in order
         // to approve platform spend money
@@ -214,8 +249,11 @@ const Platform: FC = () => {
             return;
         }
 
+        const deadlineUnix = (deadline.getTime());
+
         console.log ("active accout:" ,activeAccount);
         console.log (platformContract);
+        console.log (deadlineUnix);
 
         // make transaction to smart contract
         if (!api || !activeAccount || !platformContract) {
@@ -226,7 +264,7 @@ const Platform: FC = () => {
         try {
             await contractTxWithToast(api, activeAccount.address, platformContract, 'initializeProject', {}, [
                     fundingGoalNumber,
-                    parseInt(deadline),
+                    deadlineUnix,
             ])
                 // reset()
         } catch (e) {
@@ -234,11 +272,11 @@ const Platform: FC = () => {
             return;
         }
 
-        projectCounter.current += 1;
+        setProjectCounter(projectCounter => projectCounter + 1);
 
         const newProject: Project = {
           name: projectName,
-          projectId: projectCounter.current,
+          projectId: projectCounter,
           fundingGoal,
           deadline,
           investedFunds: '0',
@@ -248,7 +286,7 @@ const Platform: FC = () => {
 
         setProjectName('');
         setFundingGoal('');
-        setDeadline('');
+        setDeadline(new Date);
     };
 
     const handleInvestInProject = async (projectId: number) => {
@@ -260,7 +298,7 @@ const Platform: FC = () => {
 
         try {
             await contractTxWithToast(api, activeAccount.address, platformContract, 'investFunds', {}, [
-                    100,
+                    1,
                     projectId,
             ])
                 // reset()
@@ -333,13 +371,16 @@ const Platform: FC = () => {
             enqueueSnackbar('Error during execution of cashout funds function ', { variant: 'error' });
             return;
         } finally {
-            fetchProjectInfo(projectId);
+            // fetchProjectInfo(projectId);
         }
+
+        setProjects((prevProjects) =>
+            prevProjects.filter((project) => project.projectId !== projectId)
+        );
     };
 
     return (
-            <MainContainer>
-
+        <MainContainer>
             <ApprovalContainer>
                 <InputField
                     label="Token Amount"
@@ -361,120 +402,123 @@ const Platform: FC = () => {
                     Approve Platform to Spend Tokens
                 </StyledButton>
             </ApprovalContainer>
-
             <Typography variant="h4" component="h1" gutterBottom>
-            Platform
+                Platform
             </Typography>
-
             <InputContainer>
-            <InputField
-            label="Project Name"
-            variant="outlined"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            InputProps={{
-style: {
-color: '#C0C0C0',
-},
-}}
-InputLabelProps={{
-style: {
-color: '#C0C0C0',
-},
-}}
-/>
-<InputField
-label="Funding Goal"
-variant="outlined"
-value={fundingGoal}
-onChange={(e) => setFundingGoal(e.target.value)}
-InputProps={{
-style: {
-color: '#C0C0C0',
-       },
-}}
-InputLabelProps={{
-style: {
-color: '#C0C0C0',
-       },
-}}
-/>
-<InputField
-label="Deadline"
-variant="outlined"
-value={deadline}
-onChange={(e) => setDeadline(e.target.value)}
-InputProps={{
-style: {
-color: '#C0C0C0',
-       },
-}}
-InputLabelProps={{
-style: {
-color: '#C0C0C0',
-       },
-}}
-/>
-<StyledButton variant="contained" onClick={handleAddProject}>
-Add Project
-</StyledButton>
-</InputContainer>
-<Grid container spacing={2} justifyContent="center">
-{projects.map((project, index) => (
-            <Grid item key={index} xs={12} md={6}>
-            <ProjectCard>
-            <ProjectCardContent>
-            <Typography variant="h5" component="div">
-            {project.name}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-            Invested Funds: {project.investedFunds}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-            Funding Goal: {project.fundingGoal}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-            Deadline: {project.deadline}
-            </Typography>
-            </ProjectCardContent>
-            <CardActions>
-            <ButtonContainer>
+                <InputField
+                    label="Project Name"
+                    variant="outlined"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    InputProps={{
+                        style: {
+                            color: '#C0C0C0',
+                        },
+                    }}
+                    InputLabelProps={{
+                        style: {
+                            color: '#C0C0C0',
+                        },
+                    }}
+                />
+                <InputField
+                    label="Funding Goal"
+                    variant="outlined"
+                    value={fundingGoal}
+                    onChange={(e) => setFundingGoal(e.target.value)}
+                    InputProps={{
+                        style: {
+                            color: '#C0C0C0',
+                        },
+                    }}
+                    InputLabelProps={{
+                        style: {
+                            color: '#C0C0C0',
+                        },
+                    }}
+                />
+                <DatePicker
+                    selected={deadline}
+                    onChange={(date: Date) => setDeadline(date)}
+                    showTimeSelect
+                    dateFormat="Pp"
+                    customInput={
+                        <InputField
+                            label="Deadline"
+                            variant="outlined"
+                            InputProps={{
+                                style: {
+                                    color: '#C0C0C0',
+                                },
+                            }}
+                            InputLabelProps={{
+                                style: {
+                                    color: '#C0C0C0',
+                                },
+                            }}
+                        />
+                    }
+                />
+                <StyledButton variant="contained" onClick={handleAddProject}>
+                    Add Project
+                </StyledButton>
+            </InputContainer>
+            <Grid container spacing={2} justifyContent="center">
+                {projects.map((project, index) => (
+                    <Grid item key={index} xs={12} md={6}>
+                        <ProjectCard>
+                            <ProjectCardContent>
+                                <Typography variant="h5" component="div">
+                                    {project.name}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Invested Funds: {project.investedFunds}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Funding Goal: {project.fundingGoal}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Deadline: {project.deadline.toLocaleString()}
+                                </Typography>
+                            </ProjectCardContent>
+                            <CardActions>
+                                <ButtonContainer>
+                                <StyledButton variant="contained" onClick={() => handleInvestInProject(project.projectId)}>
+                                Invest
+                                </StyledButton>
 
-            <StyledButton variant="contained" onClick={() => handleInvestInProject(project.projectId)}>
-                Invest
-            </StyledButton>
+                                <StyledButton variant="contained" onClick={() => handleRevokeFundsFromProject(project.projectId)}>
+                                Withdraw
+                                </StyledButton>
 
-            <StyledButton variant="contained" onClick={() => handleRevokeFundsFromProject(project.projectId)}>
-                Withdraw
-            </StyledButton>
+                                <StyledButton variant="contained" onClick={() => handleRefundFundsFromProject(project.projectId)}>
+                                Refund
+                                </StyledButton>
 
-            <StyledButton variant="contained" onClick={() => handleRefundFundsFromProject(project.projectId)}>
-                Refund
-            </StyledButton>
-
-            <StyledButton variant="contained" onClick={() => handleCashoutFundsFromProject(project.projectId)}>
-                Cashout
-            </StyledButton>
-            </ButtonContainer>
-            </CardActions>
-            </ProjectCard>
+                                <StyledButton variant="contained" onClick={() => handleCashoutFundsFromProject(project.projectId)}>
+                                Cashout
+                                </StyledButton>
+                                </ButtonContainer>
+                            </CardActions>
+                        </ProjectCard>
+                    </Grid>
+                ))}
             </Grid>
-            ))}
-            </Grid>
-            </MainContainer>
-            );
-            };
+        </MainContainer>
+    );
+};
 
 const App: FC = () => (
-        <SnackbarProvider
+    <SnackbarProvider
         maxSnack={3}
         anchorOrigin={{
-vertical: 'bottom',
-horizontal: 'center',
-}}
->
-<Platform />
-</SnackbarProvider>
+            vertical: 'bottom',
+            horizontal: 'center',
+        }}
+    >
+        <Platform />
+    </SnackbarProvider>
 );
 
 export default App;

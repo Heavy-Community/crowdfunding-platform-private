@@ -119,7 +119,7 @@ const Faucet: FC = () => {
     const [withdrawingAmount, setWithdrawingAmount] = useState<string>('');
 
     const [tokens, setTokens] = useState<Token[]>([
-        { name: 'ERC20 Token (Currently supported)', address: ContractsAddresses.Token, amount: '420' },
+        { name: 'Platform Token (Currently Supported)', address: ContractsAddresses.Token, amount: '5' },
     ]);
 
     const form = useForm<z.infer<typeof formSchema>>({

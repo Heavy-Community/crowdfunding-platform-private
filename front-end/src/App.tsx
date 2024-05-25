@@ -7,6 +7,7 @@ import { UseInkathonProvider, SubstrateChain } from '@scio-labs/use-inkathon';
 import Sidebar from './components/Sidebar';
 import Faucet from './pages/Faucet';
 import Platform from './pages/Platform';
+import { Toaster } from 'react-hot-toast'
 
 const App: React.FC = () => {
     const [balance, setBalance] = useState<string | null>(null);
@@ -33,6 +34,7 @@ const App: React.FC = () => {
                             <Route path="/platform" element={<Platform />} />
                             <Route path="/" element={<Faucet />} />
                         </Routes>
+                        <Toaster />
                     </Box>
                 </Box>
             </Router>

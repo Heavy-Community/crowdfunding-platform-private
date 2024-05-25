@@ -7,8 +7,8 @@ export const FaucetAbi = FaucetJson as Record<string, any>;
 export const PlatformAbi = PlatformJson as Record<string, any>;
 
 export enum ContractsAddresses {
-    Token = '5Emr6PEhmRGuExeMZ5ns2NcDLZD7yi5YyvsR15wmGCTZ3AYv',
+    Token = '5D6UmJWR9eeodNsEQLued24KiBLmWFDwXHj7hN97zM6fQT9E',
     Faucet = '5HQs79zc9MNSKAa37tXkhAMEm8dYJKYFDWEDpAD6dsfP9WVt',
-    Platform = '5FXWDW5tL4mKspkc6vCt8AsN6RfRdyFSM3uDc49KadhjPc2y',
+    Platform = '5H8GMducLxz2TqSAENnoDJ1oQWHYu74QTgixS9YgvLH9gcmf',
 }
 
