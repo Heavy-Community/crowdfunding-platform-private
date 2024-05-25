@@ -24,6 +24,54 @@ mod platform {
         InvalidAmount,
     }
 
+    /// Event emitted when a new `project` is initialized by `owner`.
+    #[ink(event)]
+    pub struct InitializeProject {
+        #[ink(topic)]
+        project: Project,
+        #[ink(topic)]
+        owner: Option<AccountId>,
+    }
+
+    /// Event emitted when a new investment in a particular `project` occurs.
+    #[ink(event)]
+    pub struct InvestFunds {
+        #[ink(topic)]
+        project: Project,
+        #[ink(topic)]
+        investor: Option<AccountId>,
+        amount: Balance,
+    }
+
+    /// Event emitted when the funds from a successful `project` are withdrawn by the `owner`.
+    #[ink(event)]
+    pub struct WithdrawFunds {
+        #[ink(topic)]
+        project: Project,
+        #[ink(topic)]
+        owner: Option<AccountId>,
+    }
+
+    /// Event emitted when the `amount` of an investment revocation occurs by an `investor` in a particular `project`.
+    #[ink(event)]
+    pub struct RevokeFunds {
+        #[ink(topic)]
+        project: Project,
+        #[ink(topic)]
+        investor: Option<AccountId>,
+        amount: Balance,
+    }
+
+    /// Event emitted when the entire `amount` of investments is refunded from a particular failed `project` by an `investor`.
+    #[ink(event)]
+    pub struct RefundFunds {
+        #[ink(topic)]
+        project: Project,
+        #[ink(topic)]
+        investor: Option<AccountId>,
+        amount: Balance,
+    }
+
     /// The Platform result type.
     pub type Result<T> = core::result::Result<T, Error>;
 
@@ -150,6 +198,11 @@ mod platform {
 
             self.projects_counter = self.projects_counter.checked_add(1).unwrap();
 
+            self.env().emit_event(InitializeProject {
+                project: new_project,
+                owner: Some(self.env().caller()),
+            });
+
             Ok(())
         }
 
@@ -174,7 +227,8 @@ mod platform {
                         return Err(Error::FailedCalculation);
                     }
 
-                    self.investors.insert((investor, project_id), &new_invested_amount.unwrap());
+                    self.investors
+                        .insert((investor, project_id), &new_invested_amount.unwrap());
                 }
             } else {
                 self.investors.insert((investor, project_id), &amount);
@@ -209,6 +263,12 @@ mod platform {
                 return Err(Error::TransferFailed);
             }
 
+            self.env().emit_event(InvestFunds {
+                project,
+                investor: Some(investor),
+                amount,
+            });
+
             Ok(())
         }
 
@@ -227,6 +287,8 @@ mod platform {
                 .get(project_id)
                 .unwrap()
                 .invested_funds;
+
+            let project = self.ongoing_projects.get(project_id).unwrap();
 
             // Remove from the map of projects
             self.ongoing_projects.remove(project_id);
@@ -253,6 +315,11 @@ mod platform {
                 return Err(Error::TransferFailed);
             }
 
+            self.env().emit_event(WithdrawFunds {
+                project,
+                owner: Some(owner),
+            });
+
             Ok(())
         }
 
@@ -276,16 +343,19 @@ mod platform {
                 }
                 // Remove from investors if investor decides to revoke all his deposits.
                 if amount_after_revoke.unwrap() == 0 {
-                    self.investors.remove((investor, project_id));    
+                    self.investors.remove((investor, project_id));
                 } else {
                     // If he is revoking only a certain amount, overwrite his investment.
-                    self.investors.insert((investor, project_id), &amount_after_revoke.unwrap());
+                    self.investors
+                        .insert((investor, project_id), &amount_after_revoke.unwrap());
                 }
 
                 let mut project = self.ongoing_projects.get(project_id).unwrap();
                 project.invested_funds = project.invested_funds.checked_sub(amount).unwrap();
                 self.ongoing_projects.insert(project_id, &project);
             }
+
+            let project = self.ongoing_projects.get(project_id).unwrap();
 
             // Transfer the `amount_invested` previously by `investor` back to him
             let mut call_flags = ink::env::CallFlags::empty();
@@ -308,6 +378,12 @@ mod platform {
             if transfer_result.is_err() {
                 return Err(Error::TransferFailed);
             }
+
+            self.env().emit_event(RevokeFunds {
+                project,
+                investor: Some(investor),
+                amount,
+            });
 
             Ok(())
         }
@@ -357,6 +433,12 @@ mod platform {
             if transfer_result.is_err() {
                 return Err(Error::TransferFailed);
             }
+
+            self.env().emit_event(RefundFunds {
+                project,
+                investor: Some(investor),
+                amount: amount_invested,
+            });
 
             Ok(())
         }
