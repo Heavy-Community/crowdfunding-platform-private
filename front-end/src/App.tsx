@@ -25,7 +25,7 @@ const App: React.FC = () => {
             <Router>
                 <Box sx={{ display: 'flex' }}>
                     <CssBaseline />
-                    <Sidebar balance={balance} />
+                    <Sidebar />
                     <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                         <Toolbar />
                         <Routes>
