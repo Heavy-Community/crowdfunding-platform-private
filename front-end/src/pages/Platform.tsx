@@ -1,13 +1,8 @@
 'use client';
 
 import { FC, useState, useEffect } from 'react';
-import { ApiPromise } from '@polkadot/api';
-import { web3Accounts, web3FromAddress } from '@polkadot/extension-dapp';
-
-// TODO: Fix if possible
-// import { ContractOptions } from '@polkadot/api-contract/types'
-
 import { Button, TextField, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { web3FromAddress } from '@polkadot/extension-dapp';
 import { styled } from '@mui/system';
 
 import { ContractIds } from '../deployments/deployments'
@@ -19,6 +14,32 @@ import {
     useInkathon,
     useRegisteredContract,
 } from '@scio-labs/use-inkathon';
+
+type Balance = bigint;
+type Timestamp = bigint; // or Date
+type AccountId = string;
+type u128 = number;
+
+enum ProjectStatus {
+    Ongoing,
+    Succeded,
+    Failed,
+}
+
+interface Project {
+    investedFunds: Balance;
+    fundingGoal: Balance;
+    deadline: Timestamp; // Should we use Date?
+    owner: AccountId;
+    status: ProjectStatus;
+}
+
+interface Platform {
+    projectsCounter: u128;
+    ongoingProjects: Map<u128, Project>; // CHANGE TO BALANCE
+    investors: Map<[AccountId, u128], u128>; // Nested map to represent (AccountId, u128) -> Balance
+    tokenAddress: AccountId;
+}
 
 const InputContainer = styled(Box)({
     display: 'flex',
@@ -95,50 +116,37 @@ const TokenListItem = styled(ListItem)({
     },
 });
 
-interface Token {
-    name: string;
-    address: string;
-    amount: string;
-}
-
-const Faucet: FC = () => {
+const Platform = () => {
     const { api, activeAccount, activeSigner } = useInkathon();
     const { contract: tokenContract, address: tokenContractAddress } = useRegisteredContract(ContractIds.Token)
 
-    const [balance, setBalance] = useState<string>('');
-    const [fetchIsLoading, setFetchIsLoading] = useState<boolean>(false);
-    const [tokenName, setTokenName] = useState<string>('');
-    const [newTokenContractAddress, setNewTokenContractAddress] = useState<string>('');
-    const [withdrawingAmount, setWithdrawingAmount] = useState<string>('');
+    const [investedFunds, setinvestedFunds] = useState<number>();
+    const [fundingGoal, setFundingGoal] = useState<number>();
+    const [deadline, setDeadline] = useState<number>();
+    const [owner, setOwner] = useState<number>();
+    const [status, setStatus] = useState<number>();
 
-    const [tokens, setTokens] = useState<Token[]>([
-        { name: 'ERC20 Token (Currently implemented)', address: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu', amount: '420' },
+    const [projects, setProjects] = useState<Project[]>([
+        // {
+        //     investedFunds: BigInt(2),
+        //     fundingGoal: BigInt(1),
+        //     deadline: BigInt(2),
+        //     owner: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu',
+        //     status: ProjectStatus.Ongoing
+        // }
     ]);
 
-    const fetchBalance = async () => {
-        if (!tokenContract || !api || !activeAccount) return;
-
-        setFetchIsLoading(true);
-        try {
-            const result = await contractQuery(api, activeAccount.address, tokenContract, 'balanceOf', {} as any, [activeAccount.address])
-
-            const { output, isError, decodedOutput } = decodeOutput(result, tokenContract, 'balanceOf');
-            if (isError) throw new Error(decodedOutput);
-            setBalance(output?.toString() || '');
-        } catch (e) {
-            console.error(e);
-            toast.error('Error while fetching balance. Try again…');
-            setBalance('');
-        } finally {
-            setFetchIsLoading(false);
+    const [platform, setPlatform] = useState<Platform[]>([
+        {            
+            projectsCounter: 1,
+            ongoingProjects: new Map<1, Project>,
+            investors: new Map<['5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu', 1], 1>(),
+            tokenAddress: '000000000000000000000000000000000000000000000000'
         }
-    };
+    ]);
 
-    useEffect(() => {
-        fetchBalance();
-    }, [tokenContract]);
-
-    const handleAddTokenType = async () => {
+    const handleAddProject = async () => {
+        console.log('asd')
         // if (!api || !activeAccount || !newTokenContractAddress || !withdrawingAmount || !tokenName) return;
         // const injector = await web3FromAddress(activeAccount.address);
         // const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
@@ -150,35 +158,31 @@ const Faucet: FC = () => {
         //     api.tx.contracts.encodeContractCall('addTokenType', newTokenContractAddress, withdrawingAmount)
         // ).signAndSend(activeAccount.address, { signer: injector.signer });
 
-        setTokens([...tokens, { name: tokenName, address: newTokenContractAddress, amount: withdrawingAmount }]);
+        setProjects([
+            ...projects,
+            {
+            investedFunds: BigInt(1),
+            fundingGoal: fundingGoal as any,
+            deadline: deadline as any,
+            owner: '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu',
+            status: ProjectStatus.Ongoing
+            }
+        ]);
     };
-
-    const handleRequestTokens = async (tokenAddress: string) => {
-        if (!api || !activeAccount || !tokenAddress) return;
-        const injector = await web3FromAddress(activeAccount.address);
-        const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
-
-        await api.tx.contracts.call(
-            faucetContractAddress,
-            0,
-            -1,
-            api.tx.contracts.encodeContractCall('requestTokens', tokenAddress)
-        ).signAndSend(activeAccount.address, { signer: injector.signer });
-
-        fetchBalance();
-    };
+    
 
     return (
         <MainContainer>
         <Typography variant="h4" component="h1" gutterBottom>
-        Faucet
+        Platform
         </Typography>
         <InputContainer>
         <InputField
-        label="Token Name"
+        label="Funding Goal"
         variant="outlined"
-        value={tokenName}
-        onChange={(e) => setTokenName(e.target.value)}
+        type="number"
+        value={fundingGoal}
+        onChange={(e) => setFundingGoal(parseInt(e.target.value))}
         InputProps={{
             style: {
                 color: '#C0C0C0',
@@ -191,10 +195,11 @@ const Faucet: FC = () => {
         }}
         />
         <InputField
-        label="Token Contract Address"
+        label="Deadline"
         variant="outlined"
-        value={newTokenContractAddress}
-        onChange={(e) => setNewTokenContractAddress(e.target.value)}
+        type="number"
+        value={deadline}
+        onChange={(e) => setDeadline(parseInt(e.target.value))}
         InputProps={{
             style: {
                 color: '#C0C0C0',
@@ -206,36 +211,32 @@ const Faucet: FC = () => {
             },
         }}
         />
-        <InputField
-        label="Withdrawing Amount"
-        variant="outlined"
-        value={withdrawingAmount}
-        onChange={(e) => setWithdrawingAmount(e.target.value)}
-        InputProps={{
-            style: {
-                color: '#C0C0C0',
-            },
-        }}
-        InputLabelProps={{
-            style: {
-                color: '#C0C0C0',
-            },
-        }}
-        />
-        <StyledButton variant="contained" onClick={handleAddTokenType}>
-        Add Token Type
+        <StyledButton variant="contained" onClick={handleAddProject}>
+        Add Project
         </StyledButton>
         </InputContainer>
         <TokenList>
-        {tokens.map((token, index) => (
+            <List sx={{ backgroundColor: '#202020', color: '#f0f0f0' }} className="MuiList-root">
+            {projects.map((project, index) => (
+            <TokenListItem key={index}>
+                <>deadline: <ListItem key={index}>{project.deadline as any}</ListItem>
+                fundingGoal: <ListItem key={index}>{project.fundingGoal as any}</ListItem>
+                investedFunds: <ListItem key={index}>{project.investedFunds as any}</ListItem>
+                owner: <ListItem key={index}>{project.owner as any}</ListItem>
+                status: <ListItem key={index}>{project.status as any}</ListItem></>
+            </TokenListItem>
+            ))}
+            </List>
+        {projects.map((project, index) => (
             <TokenListItem key={index}>
             <ListItemText
-            primary={token.name}
-            secondary={`Amount: ${token.amount}`}
+            primary={project.fundingGoal.toString() as React.ReactNode}
+            secondary={`Deadline: ${project.deadline.toString() as React.ReactNode}`}
+            children={`asd: ${project.deadline.toString() as React.ReactNode}`}
             />
-            <StyledButton variant="contained" onClick={() => handleRequestTokens(token.address)}>
+            {/* <StyledButton variant="contained" onClick={() => handleRequestTokens(token.address)}>
             Request Tokens
-            </StyledButton>
+            </StyledButton> */}
             </TokenListItem>
         ))}
         </TokenList>
@@ -243,5 +244,5 @@ const Faucet: FC = () => {
     );
 };
 
-export default Faucet;
+export default Platform;
 
