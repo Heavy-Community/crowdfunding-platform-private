@@ -1,8 +1,18 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { Box, TextField, Button, Typography, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+} from '@mui/material';
 import { styled } from '@mui/system';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 
 const InputContainer = styled(Box)({
   display: 'flex',
@@ -36,10 +46,17 @@ const InputField = styled(TextField)({
 const StyledButton = styled(Button)({
   margin: '10px',
   height: '56px',
-  backgroundColor: '#212121',
+  backgroundColor: '#212121', // Restoring the previous color
   color: '#FFFFFF',
+  borderRadius: '8px', // Slightly rounded corners
+  transition: 'background-color 0.3s, box-shadow 0.3s, transform 0.3s',
   '&:hover': {
     backgroundColor: '#333333',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+    transform: 'scale(1.05)', // Slight scaling effect on hover
+  },
+  '&:active': {
+    transform: 'scale(0.95)', // Slight scaling effect on click
   },
 });
 
@@ -56,33 +73,29 @@ const MainContainer = styled(Box)({
   minHeight: '100vh',
 });
 
-const ProjectList = styled(List)({
+const ProjectCard = styled(Card)({
   width: '100%',
   maxWidth: 600,
-  backgroundColor: '#1e1e1e',
+  backgroundColor: '#2b2b2b',
   borderRadius: '8px',
-  marginTop: '20px',
+  marginBottom: '20px',
   color: '#FFFFFF',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+  transition: 'transform 0.3s',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
 });
 
-const ProjectListItem = styled(ListItem)({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  '& .MuiListItemText-primary': {
-    color: '#FFFFFF',
-    fontSize: '1.2rem',
-  },
-  '& .MuiListItemText-secondary': {
-    color: '#FFFFFF',
-    fontSize: '1rem',
+const ProjectCardContent = styled(CardContent)({
+  '& .MuiTypography-root': {
+    color: '#E0E0E0',
   },
 });
 
 const ButtonContainer = styled(Box)({
   display: 'flex',
-  justifyContent: 'space-between',
+  justifyContent: 'space-around',
   width: '100%',
 });
 
@@ -98,9 +111,18 @@ const Platform: FC = () => {
   const [fundingGoal, setFundingGoal] = useState<string>('');
   const [deadline, setDeadline] = useState<string>('');
   const [projects, setProjects] = useState<Project[]>([]);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleAddProject = () => {
-    if (!projectName || !fundingGoal || !deadline) return;
+    if (!projectName || !fundingGoal || !deadline) {
+      enqueueSnackbar('All fields are required!', { variant: 'error' });
+      return;
+    }
+    const fundingGoalNumber = parseFloat(fundingGoal);
+    if (isNaN(fundingGoalNumber) || fundingGoalNumber <= 0) {
+      enqueueSnackbar('Funding goal must be a positive number!', { variant: 'error' });
+      return;
+    }
     const newProject: Project = {
       name: projectName,
       fundingGoal,
@@ -171,25 +193,50 @@ const Platform: FC = () => {
           Add Project
         </StyledButton>
       </InputContainer>
-      <ProjectList>
+      <Grid container spacing={2} justifyContent="center">
         {projects.map((project, index) => (
-          <ProjectListItem key={index}>
-            <ListItemText
-              primary={project.name}
-              secondary={`Invested Funds: ${project.investedFunds} | Funding Goal: ${project.fundingGoal} | Deadline: ${project.deadline}`}
-            />
-            <ButtonContainer>
-              <StyledButton variant="contained">Invest</StyledButton>
-              <StyledButton variant="contained">Revoke</StyledButton>
-              <StyledButton variant="contained">Refund</StyledButton>
-              <StyledButton variant="contained">Withdraw</StyledButton>
-            </ButtonContainer>
-          </ProjectListItem>
+          <Grid item key={index} xs={12} md={6}>
+            <ProjectCard>
+              <ProjectCardContent>
+                <Typography variant="h5" component="div">
+                  {project.name}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Invested Funds: {project.investedFunds}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Funding Goal: {project.fundingGoal}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Deadline: {project.deadline}
+                </Typography>
+              </ProjectCardContent>
+              <CardActions>
+                <ButtonContainer>
+                  <StyledButton variant="contained">Invest</StyledButton>
+                  <StyledButton variant="contained">Revoke</StyledButton>
+                  <StyledButton variant="contained">Refund</StyledButton>
+                  <StyledButton variant="contained">Withdraw</StyledButton>
+                </ButtonContainer>
+              </CardActions>
+            </ProjectCard>
+          </Grid>
         ))}
-      </ProjectList>
+      </Grid>
     </MainContainer>
   );
 };
 
-export default Platform;
+const App: FC = () => (
+  <SnackbarProvider
+    maxSnack={3}
+    anchorOrigin={{
+      vertical: 'bottom',
+      horizontal: 'center',
+    }}
+  >
+    <Platform />
+  </SnackbarProvider>
+);
 
+export default App;
