@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.js": "/crowdfunding-platform-private/static/js/main.a3b819d5.js",
+    "static/js/164.0f5b59db.chunk.js": "/crowdfunding-platform-private/static/js/164.0f5b59db.chunk.js",
+    "static/media/polkadot-logo.png": "/crowdfunding-platform-private/static/media/polkadot-logo.49d3021d110a2e391dba.png",
+    "index.html": "/crowdfunding-platform-private/index.html",
+    "main.a3b819d5.js.map": "/crowdfunding-platform-private/static/js/main.a3b819d5.js.map",
+    "164.0f5b59db.chunk.js.map": "/crowdfunding-platform-private/static/js/164.0f5b59db.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.a3b819d5.js"
+  ]
+}
