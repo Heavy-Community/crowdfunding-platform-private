@@ -1,4 +1,26 @@
 {
+  "source": {
+    "hash": "0x29aba790ad4edd6e4b3bcc1dda12c0c6371f78f14eed2b9b5a89aa3e60637a5b",
+    "language": "ink! 5.0.0",
+    "compiler": "rustc 1.77.2",
+    "build_info": {
+      "build_mode": "Release",
+      "cargo_contract_version": "4.1.1",
+      "rust_toolchain": "stable-x86_64-unknown-linux-gnu",
+      "wasm_opt_settings": {
+        "keep_debug_symbols": false,
+        "optimization_passes": "Z"
+      }
+    }
+  },
+  "contract": {
+    "name": "faucet",
+    "version": "5.0.0",
+    "authors": [
+      "Emil Tsanev"
+    ]
+  },
+  "image": null,
   "spec": {
     "constructors": [
       {
@@ -37,19 +59,19 @@
         "displayName": [
           "BlockNumber"
         ],
-        "type": 23
+        "type": 24
       },
       "chainExtension": {
         "displayName": [
           "ChainExtension"
         ],
-        "type": 24
+        "type": 25
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 22
+        "type": 23
       },
       "maxEventTopics": 4,
       "staticBufferSize": 16384,
@@ -60,7 +82,51 @@
         "type": 0
       }
     },
-    "events": [],
+    "events": [
+      {
+        "args": [
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "to",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 22
+            }
+          },
+          {
+            "docs": [],
+            "indexed": true,
+            "label": "token",
+            "type": {
+              "displayName": [
+                "Option"
+              ],
+              "type": 22
+            }
+          },
+          {
+            "docs": [],
+            "indexed": false,
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 10
+            }
+          }
+        ],
+        "docs": [
+          "Event emitted when a token transfer occurs."
+        ],
+        "label": "TokensGiven",
+        "module_path": "faucet::faucet",
+        "signature_topic": "0xb260c150ed8867681b206feac056df102b8a99c278a36323f3afb85961f4d14b"
+      }
+    ],
     "lang_error": {
       "displayName": [
         "ink",
@@ -697,6 +763,39 @@
       "id": 22,
       "type": {
         "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "None"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 3
+                  }
+                ],
+                "index": 1,
+                "name": "Some"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 3
+          }
+        ],
+        "path": [
+          "Option"
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "type": {
+        "def": {
           "composite": {
             "fields": [
               {
@@ -714,7 +813,7 @@
       }
     },
     {
-      "id": 23,
+      "id": 24,
       "type": {
         "def": {
           "primitive": "u32"
@@ -722,7 +821,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 25,
       "type": {
         "def": {
           "variant": {}

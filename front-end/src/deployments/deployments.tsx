@@ -8,8 +8,8 @@ export const PlatformAbi = PlatformJson as Record<string, any>;
 
 export enum ContractsAddresses {
     Token = '5FcewiPMSveFJxgxyqNmwRCvRj7nSp4HcZriyaHzk3jexFxw',
+    Faucet = '5Fm2EUXjj6oXoUooCxYYF2rGZxNXrkkwVA1noTGjn8fy9mxB',
     // TODO: Change with real address of the deployed contracts
-    Faucet = '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu',
     Platform = '5Hgiu38EojYy9DLpJJcNXer18ubxGh8bZLZv86SBf2kEmXeu',
 }
 

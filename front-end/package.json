@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@hookform/resolvers": "^3.4.2",
     "@mui/material": "^5.15.18",
     "@mui/styles": "^5.15.18",
     "@polkadot/api": "^11.1.1",
@@ -21,13 +22,15 @@
     "notistack": "^3.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.51.5",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.5",
     "typescript": "^4.9.5",
     "useink": "^1.14.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zod": "^3.23.8"
   },
   "scripts": {
     "start": "react-scripts start",
