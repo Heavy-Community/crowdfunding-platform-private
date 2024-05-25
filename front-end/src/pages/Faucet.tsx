@@ -1,21 +1,17 @@
 'use client';
-
 import { FC, useState, useEffect } from 'react';
-import { ApiPromise } from '@polkadot/api';
-import { web3Accounts, web3FromAddress } from '@polkadot/extension-dapp';
 
-// TODO: Fix if possible
-// import { ContractOptions } from '@polkadot/api-contract/types'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast';
+import * as z from 'zod'
 
 import { Button, TextField, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
 import { styled } from '@mui/system';
 
-import {
-    ContractsAddresses,
-    TokenAbi,
-    FaucetAbi
-} from '../deployments/deployments'
-import toast from 'react-hot-toast';
+import { contractTxWithToast } from '../utils/toast-tx-wrapper'
+
+import { ContractsAddresses, FaucetAbi } from '../deployments/deployments'
 
 import {
     contractQuery,
@@ -23,6 +19,10 @@ import {
     useInkathon,
     useContract
 } from '@scio-labs/use-inkathon';
+
+const formSchema = z.object({
+  newMessage: z.string().min(1).max(90),
+})
 
 const InputContainer = styled(Box)({
     display: 'flex',
@@ -109,45 +109,27 @@ const Faucet: FC = () => {
     const { api, activeAccount, activeSigner } = useInkathon();
     console.log("profile: ", activeAccount);
 
-    const { contract: tokenContract, address: tokenContractAddress } = useContract(TokenAbi, ContractsAddresses.Token);
     const { contract: faucetContract, address: faucetContractAddress } = useContract(FaucetAbi, ContractsAddresses.Faucet);
 
     const [balance, setBalance] = useState<string>('');
     const [fetchIsLoading, setFetchIsLoading] = useState<boolean>(false);
+
     const [tokenName, setTokenName] = useState<string>('');
-    const [newTokenContractAddress, setNewTokenContractAddress] = useState<string>('');
+    const [tokenContractAddress, setTokenContractAddress] = useState<string>('');
     const [withdrawingAmount, setWithdrawingAmount] = useState<string>('');
 
     const [tokens, setTokens] = useState<Token[]>([
         { name: 'ERC20 Token (Currently implemented)', address: '5FcewiPMSveFJxgxyqNmwRCvRj7nSp4HcZriyaHzk3jexFxw', amount: '420' },
     ]);
 
-    const fetchBalance = async () => {
-        if (!tokenContract || !api || !activeAccount) return;
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+    });
 
-        setFetchIsLoading(true);
-        try {
-            const result = await contractQuery(api, activeAccount.address, tokenContract, 'balanceOf', {} as any, [activeAccount.address])
-
-            const { output, isError, decodedOutput } = decodeOutput(result, tokenContract, 'balanceOf');
-            if (isError) throw new Error(decodedOutput);
-            setBalance(output?.toString() || '0');
-        } catch (e) {
-            console.error(e);
-            toast.error('Error while fetching balance. Try again…');
-            setBalance('0');
-        } finally {
-            setFetchIsLoading(false);
-            console.log("BALANCE: ", balance);
-        }
-    };
-
-    useEffect(() => {
-        fetchBalance();
-    }, [tokenContract]);
+    const { register, reset, handleSubmit } = form;
 
     const handleAddTokenType = async () => {
-        if (!api || !activeAccount || !newTokenContractAddress || !withdrawingAmount || !tokenName) return;
+        if (!api || !activeAccount || !tokenContractAddress || !withdrawingAmount || !tokenName) return;
         /// TODO: REWORK
         // const injector = await web3FromAddress(activeAccount.address);
         // const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
@@ -156,26 +138,28 @@ const Faucet: FC = () => {
         //     faucetContractAddress,
         //     0,
         //     -1,
-        //     api.tx.contracts.encodeContractCall('addTokenType', newTokenContractAddress, withdrawingAmount)
+        //     api.tx.contracts.encodeContractCall('addTokenType', tokenContractAddress, withdrawingAmount)
         // ).signAndSend(activeAccount.address, { signer: injector.signer });
 
-        setTokens([...tokens, { name: tokenName, address: newTokenContractAddress, amount: withdrawingAmount }]);
+        setTokens([...tokens, { name: tokenName, address: tokenContractAddress, amount: withdrawingAmount }]);
     };
 
     const handleRequestTokens = async (tokenAddress: string) => {
-        if (!api || !activeAccount || !tokenAddress || !faucetContractAddress) return;
-        /// TODO: REWORK
-        // const injector = await web3FromAddress(activeAccount.address);
-        // const faucetContractAddress = '5E6sr8VxAy5y9Wawwi8VtUpZzU9mj7K2aqZzG4Rq6DCwZEJW';
+        if (!api || !activeAccount || !faucetContract) {
+            toast.error('Wallet not connected or not existing Faucet contract. Try again…');
+            return;
+        }
 
-        // await api.tx.contracts.call(
-        //     faucetContractAddress,
-        //     0,
-        //     -1,
-        //     api.tx.contracts.encodeContractCall('requestTokens', tokenAddress)
-        // ).signAndSend(activeAccount.address, { signer: injector.signer });
-
-        fetchBalance();
+        try {
+            await contractTxWithToast(api, activeAccount.address, faucetContract, 'requestTokens', {}, [
+                    tokenAddress,
+            ])
+                reset()
+        } catch (e) {
+            console.error(e)
+        } finally {
+            // fetchGreeting()
+        }
     };
 
     return (
@@ -203,8 +187,8 @@ const Faucet: FC = () => {
         <InputField
         label="Token Contract Address"
         variant="outlined"
-        value={newTokenContractAddress}
-        onChange={(e) => setNewTokenContractAddress(e.target.value)}
+        value={tokenContractAddress}
+        onChange={(e) => setTokenContractAddress(e.target.value)}
         InputProps={{
             style: {
                 color: '#C0C0C0',

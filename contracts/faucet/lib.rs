@@ -34,6 +34,16 @@ mod faucet {
     /// Account to token hash, used for a key in the mapping
     pub type AccountTokenPair = (AccountId, AccountId);
 
+    /// Event emitted when a token given occurs.
+    #[ink(event)]
+    pub struct TokensGiven {
+        #[ink(topic)]
+        to: Option<AccountId>,
+        #[ink(topic)]
+        token: Option<AccountId>,
+        amount: Balance,
+    }
+
     #[ink(storage)]
     pub struct Faucet {
         /// Map with user and requested token pairs, which holds the next
@@ -94,6 +104,12 @@ mod faucet {
                     // Transfer money to the user
                     let mut call_flags = ink::env::CallFlags::empty();
                     call_flags.set(CallFlags::TAIL_CALL, true);
+
+                    self.env().emit_event(TokensGiven {
+                        to: Some(self.env().caller()),
+                        token: Some(token_contract),
+                        amount: withdrawing_amount,
+                    });
 
                     let transfer_result = build_call::<DefaultEnvironment>()
                         .call(token_contract)
