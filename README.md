@@ -39,7 +39,17 @@ When you navigate to the platform (again, from the sidebar) you are going to see
 
 > Note the names of the platform's functionalities are slightly different for comprehensive purposes. E.g. in the smart contracts the `WITHDRAW` is actually `CASHOUT`. And `REVOKE` in the smart contracts is `WITHDRAW` in the user unterface.
 
+
+<h3>Allowance of the platform</h3>
+
+**Very important note** - You **must** approve the platform to use X amount of your tokens. The purpose of this is because we are using custom tokens that play the role of [ERC20 standart](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) that are using `approve` function under the hood.
+
 <h3>Add project</h3>
+Use must prove the name of the project, valid funding goal and deadline until the project must be successfully finished. When you click the `ADD PROJECT` button, again polkadotjs dialog windows will appear for you to sign the transaction. If the transaction is successful your crowdfunding project will appear on the list of all currently ongoing projects.
+
+> Note Right now we have 2 projects - Meme Coin and Blood Coin projects
+
+After you approved some amount of tokens to be spent from the platform's behalf (as we've already mentioned above) you can proceed to the following functionalities of the platform:
 
 <h3>Invest</h3>
 
@@ -49,6 +59,4 @@ When you navigate to the platform (again, from the sidebar) you are going to see
 
 <h3>Revoke</h3>
 
-- we have only two projects 
 - on restart they disapear
-- in order to use it you have to firstly allow 
