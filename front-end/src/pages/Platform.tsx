@@ -162,12 +162,10 @@ const Platform: FC = () => {
 
         setFetchIsLoading(true);
         try {
-            console.log("Fetching info for project id: ", projectId);
             const result = await contractQuery(api, activeAccount.address, platformContract, 'getProjectById', {} as any, [projectId])
 
             const { output, isError, decodedOutput } = decodeOutput(result, platformContract, 'getProjectById');
             if (isError) throw new Error(decodedOutput);
-            console.log(output);
             setProjectInfo(output.investedFunds?.toString() || '0');
 
             // Update the list of project (the corresponding project.invested_funds)
@@ -185,7 +183,6 @@ const Platform: FC = () => {
             setProjectInfo('0');
         } finally {
             setFetchIsLoading(false);
-            console.log("Project info: ", projectInfo);
         }
     };
 
@@ -194,12 +191,10 @@ const Platform: FC = () => {
 
         setFetchIsLoading(true);
         try {
-            console.log("Fetching info for last project id");
             const result = await contractQuery(api, activeAccount.address, platformContract, 'getProjectCounter', {} as any, [])
 
             const { output, isError, decodedOutput } = decodeOutput(result, platformContract, 'getProjectCounter');
             if (isError) throw new Error(decodedOutput);
-            console.log(output);
             setProjectCounter(parseInt(output.toString()) || 0);
         } catch (e) {
             console.error(e);
@@ -251,10 +246,6 @@ const Platform: FC = () => {
 
         const deadlineUnix = (deadline.getTime());
 
-        console.log ("active accout:" ,activeAccount);
-        console.log (platformContract);
-        console.log (deadlineUnix);
-
         // make transaction to smart contract
         if (!api || !activeAccount || !platformContract) {
             toast.error('Wallet not connected or not existing Platform contract. Try again…');
@@ -272,8 +263,6 @@ const Platform: FC = () => {
             return;
         }
 
-        setProjectCounter(projectCounter => projectCounter + 1);
-
         const newProject: Project = {
           name: projectName,
           projectId: projectCounter,
@@ -281,8 +270,8 @@ const Platform: FC = () => {
           deadline,
           investedFunds: '0',
         };
-
         setProjects([...projects, newProject]);
+        setProjectCounter(projectCounter => projectCounter + 1);
 
         setProjectName('');
         setFundingGoal('');

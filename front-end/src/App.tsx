@@ -2,6 +2,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { Box, CssBaseline, Toolbar } from '@mui/material';
 import { UseInkathonProvider, SubstrateChain } from '@scio-labs/use-inkathon';
 import Sidebar from './components/Sidebar';
@@ -23,21 +24,21 @@ const App: React.FC = () => {
             connectOnInit={true}
             defaultChain="alephzero-testnet"
         >
-            <Router>
+            <HashRouter>
                 <Box sx={{ display: 'flex' }}>
                     <CssBaseline />
                     <Sidebar />
                     <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                         <Toolbar />
                         <Routes>
+                            <Route path="/" element={<Faucet />} />
                             <Route path="/faucet" element={<Faucet />} />
                             <Route path="/platform" element={<Platform />} />
-                            <Route path="/" element={<Faucet />} />
                         </Routes>
                         <Toaster />
                     </Box>
                 </Box>
-            </Router>
+            </HashRouter>
         </UseInkathonProvider>
     );
 }

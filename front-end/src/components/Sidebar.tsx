@@ -92,7 +92,6 @@ const Sidebar: FC = () => {
             setBalance('0');
         } finally {
             setFetchIsLoading(false);
-            console.log("BALANCE: ", balance);
         }
     };
 
