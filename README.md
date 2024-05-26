@@ -60,6 +60,16 @@ Depositing funds can happen with the `INVEST` button. Accept the polkadotjs's re
 
 <h3>Withdraw</h3>
 
+As previously mentioned `WITHDRAW` is in the smart contracts implemented as the `revoke_funds` function. As the name suggests it's meant to withdraw some of the deposit of an investor if the project **is still ongoing**. The process is similiar as in the `INVEST` function. After you've clicked on the `WITHDRAW` button and the transaction passes successfully you will see that the *Invested Funds* label of the project that you've revoked from decreases by one.
+
+> Note: Click the `UPDATE BALANCE` button in the sidebar to see the changes in your balance.
+
 <h3>Refund</h3>
 
-<h3>Revoke</h3>
+If particular project has finished and has failed, then every investor can refund their investments from the project. When the last investor refund its deposits then the project is deleted.
+
+> Note: Failed project is such that its deadline has already expired and its invested funds haven't reached the funding goal before the deadline expiration.
+
+<h3>Cashout</h3>
+
+As previously mentioned `CASHOUT` is in the smart contracts implemented as the `withdraw` function. Only the owner of the project can successfully execute this function. If particular project's status is `Successful` then its owner can withdraw its investments of the project. Project can be `Successful` even if its deadline hasn't already expired.
