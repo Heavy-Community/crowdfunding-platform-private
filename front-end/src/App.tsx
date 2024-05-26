@@ -2,6 +2,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { Box, CssBaseline, Toolbar } from '@mui/material';
 import { UseInkathonProvider, SubstrateChain } from '@scio-labs/use-inkathon';
 import Sidebar from './components/Sidebar';
@@ -23,7 +24,7 @@ const App: React.FC = () => {
             connectOnInit={true}
             defaultChain="alephzero-testnet"
         >
-            <Router basename="/crowdfunding-platform-private">
+            <HashRouter>
                 <Box sx={{ display: 'flex' }}>
                     <CssBaseline />
                     <Sidebar />
@@ -34,10 +35,10 @@ const App: React.FC = () => {
                             <Route path="/faucet" element={<Faucet />} />
                             <Route path="/platform" element={<Platform />} />
                         </Routes>
-			<Toaster />
+                        <Toaster />
                     </Box>
                 </Box>
-            </Router>
+            </HashRouter>
         </UseInkathonProvider>
     );
 }
