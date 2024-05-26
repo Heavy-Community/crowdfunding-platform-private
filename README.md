@@ -75,3 +75,23 @@ If a particular project has finished and failed, then every investor can refund 
 #### Cashout
 
 As previously mentioned, `CASHOUT` is implemented as the `withdraw` function in the smart contracts. Only the owner of the project can successfully execute this function. If a particular project's status is `Successful`, then its owner can withdraw the project's investments. A project can be `Successful` even if its deadline hasn't expired.
+
+## Transparent Proxy Pattern
+
+The `transparent-proxy` smart contract serves as an intermediary between users and the platform contract. It allows users to interact with the platform contract through the proxy while enabling flexibility for upgrades.
+
+### Functions
+
+#### change_forward_address
+This function allows the owner to change the address of the platform. Only the owner can perform this operation to ensure security and prevent unauthorized changes to the implementation.
+
+#### forward
+This function forwards incoming calls to the platform contract. It ensures that the caller **is not the owner to prevent potential hash collisions**. It uses the call API to invoke the implementation contract with the same function and arguments as the original call. The `tail_call` flag is set to indicate that the platform contract should handle the call and the proxy should not return any value.
+
+### Usage
+
+1. Deploy the implementation contract.
+
+2. Deploy the proxy contract, passing the address of the implementation contract to the constructor.
+
+3. Interact with the proxy contract, which forwards calls to the implementation contract transparently.
