@@ -2,7 +2,9 @@
 
 These smart contracts establish a cutting-edge crowdfunding platform that employs an ERC20-based token currency. The platform contract empowers project owners to launch their investment campaigns, invest in, and manage funds across multiple projects.<br> Meanwhile, the faucet contract offers a seamless mechanism for users to periodically request tokens, thereby promoting the utilization of these digital assets within the platform's ecosystem.
 
-[Link to pitch video]()
+[Link to pitch video](https://youtu.be/yd-7qHPkDTA)
+
+[Website](https://heavy-community.github.io/crowdfunding-platform-private/)
 
 ## Prerequisites
 
