@@ -42,7 +42,7 @@ When you navigate to the platform (again, from the sidebar) you are going to see
 
 <h3>Allowance of the platform</h3>
 
-**Very important note** - You **must** approve the platform to use X amount of your tokens. The purpose of this is because we are using custom tokens that play the role of [ERC20 standart](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) that are using `approve` function under the hood.
+⚠️ **Very important note** - You **must** approve the platform to use X amount of your tokens. The purpose of this is because we are using custom tokens that play the role of [ERC20 standart](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) that are using `approve` function under the hood.
 
 <h3>Add project</h3>
 Use must prove the name of the project, valid funding goal and deadline until the project must be successfully finished. When you click the `ADD PROJECT` button, again polkadotjs dialog windows will appear for you to sign the transaction. If the transaction is successful your crowdfunding project will appear on the list of all currently ongoing projects.
@@ -52,11 +52,14 @@ Use must prove the name of the project, valid funding goal and deadline until th
 After you approved some amount of tokens to be spent from the platform's behalf (as we've already mentioned above) you can proceed to the following functionalities of the platform:
 
 <h3>Invest</h3>
+Depositing funds can happen with the `INVEST` button. Accept the polkadotjs's request. If everthing is successful you will see the *Invested funds* field to be incremented with the amount invested.
+
+> Note: Click the `UPDATE BALANCE` button in the sidebar to see the changes.
+
+> Note: right now the `INVEST` function transfers only 1 token to the chosen project. However, the smart contracts implementation supports custom amount of tokens investment
 
 <h3>Withdraw</h3>
 
 <h3>Refund</h3>
 
 <h3>Revoke</h3>
-
-- on restart they disapear
