@@ -107,7 +107,6 @@ interface Token {
 
 const Faucet: FC = () => {
     const { api, activeAccount, activeSigner } = useInkathon();
-    console.log("profile: ", activeAccount);
 
     const { contract: faucetContract, address: faucetContractAddress } = useContract(FaucetAbi, ContractsAddresses.Faucet);
 

@@ -23,18 +23,18 @@ const App: React.FC = () => {
             connectOnInit={true}
             defaultChain="alephzero-testnet"
         >
-            <Router>
+            <Router basename="/crowdfunding-platform-private">
                 <Box sx={{ display: 'flex' }}>
                     <CssBaseline />
                     <Sidebar />
                     <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                         <Toolbar />
                         <Routes>
+                            <Route path="/" element={<Faucet />} />
                             <Route path="/faucet" element={<Faucet />} />
                             <Route path="/platform" element={<Platform />} />
-                            <Route path="/" element={<Faucet />} />
                         </Routes>
-                        <Toaster />
+			<Toaster />
                     </Box>
                 </Box>
             </Router>
