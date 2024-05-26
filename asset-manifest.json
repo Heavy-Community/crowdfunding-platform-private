@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/crowdfunding-platform-private/static/css/main.dc3d9745.css",
-    "main.js": "/crowdfunding-platform-private/static/js/main.9af3fd2e.js",
+    "main.js": "/crowdfunding-platform-private/static/js/main.24f67819.js",
     "static/js/164.0f5b59db.chunk.js": "/crowdfunding-platform-private/static/js/164.0f5b59db.chunk.js",
     "static/media/polkadot-logo.png": "/crowdfunding-platform-private/static/media/polkadot-logo.49d3021d110a2e391dba.png",
     "index.html": "/crowdfunding-platform-private/index.html",
     "main.dc3d9745.css.map": "/crowdfunding-platform-private/static/css/main.dc3d9745.css.map",
-    "main.9af3fd2e.js.map": "/crowdfunding-platform-private/static/js/main.9af3fd2e.js.map",
+    "main.24f67819.js.map": "/crowdfunding-platform-private/static/js/main.24f67819.js.map",
     "164.0f5b59db.chunk.js.map": "/crowdfunding-platform-private/static/js/164.0f5b59db.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.dc3d9745.css",
-    "static/js/main.9af3fd2e.js"
+    "static/js/main.24f67819.js"
   ]
 }
